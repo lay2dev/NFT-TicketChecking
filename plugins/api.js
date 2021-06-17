@@ -1,5 +1,4 @@
 import '~/assets/js/utils/bigsea'
-import { createHash } from 'crypto'
 import dayjs from 'dayjs'
 import PWCore, { ChainID, IndexerCollector } from '@lay2/pw-core'
 import UnipassProvider from '~/assets/js/unipass/UnipassProvider.ts'
@@ -73,22 +72,16 @@ Sea.askVerifiy = async (address, activity) => {
   return res
 }
 
-Sea.postVerifiyData = async ({ address, nftArgs, activity, pass }) => {
-  console.log('askVerifiy')
-  const messageHash = createHash('SHA256')
-    .update('verifier_sign')
-    .digest('hex')
-    .toString()
-  const sig = await new UnipassProvider(process.env.UNIPASS_URL).sign(
-    messageHash,
-  )
+Sea.postVerifiyData = async ({ address, activity, authData }) => {
+  console.log('askVerifiy', provider.pubkey)
+  if (!authData || authData.sig === 'N/A' || authData.sig === '0x01N/A') {
+    return { pass: false }
+  }
+
   const data = {
-    messageHash,
-    sig,
     address,
-    nftArgs: nftArgs || '-',
     activity,
-    pass,
+    ...authData,
   }
   console.log('[askVerifiy]', data)
   const res = await Sea.Ajax({
@@ -96,6 +89,7 @@ Sea.postVerifiyData = async ({ address, nftArgs, activity, pass }) => {
     method: 'post',
     data,
   })
+  console.log('[askVerifiy]', res)
   return res
 }
 
@@ -108,7 +102,7 @@ Sea.getAssets = async (address, targetArgs, targetTokenID) => {
     },
   })
   console.log('[getAssets]', res)
-  const data = authNFT(res, targetArgs, targetTokenID)
+  const data = await authNFT(res, targetArgs, targetTokenID)
   console.log(data)
   return data
 }

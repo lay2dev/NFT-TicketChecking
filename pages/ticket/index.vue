@@ -17,8 +17,7 @@ export default {
       provider: null,
       targetArgs: '',
       targetTokenId: -1,
-      pass: false,
-      ntfArgs: '',
+      authData: null,
     }
   },
   mounted() {
@@ -53,11 +52,11 @@ export default {
     async postVerifiyData() {
       const data = {
         address: this.provider._address.addressString,
-        ntfArgs: this.ntfArgs,
         activity: 4,
-        pass: this.pass,
+        authData: this.authData,
       }
-      await Sea.postVerifiyData(data)
+      const res = await Sea.postVerifiyData(data)
+      console.log('[postVerifiyData]', res)
     },
     async getAssets() {
       console.log(this.provider._address.addressString)
@@ -66,8 +65,7 @@ export default {
         this.targetArgs,
         this.targetTokenId,
       )
-      this.pass = data.pass
-      this.ntfArgs = data.nftArgs
+      this.authData = data
     },
   },
 }
