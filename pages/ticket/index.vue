@@ -4,9 +4,8 @@
     <button @click="login">login</button>
     <button @click="getActivity">getActivityList</button>
     <button @click="askVerifiy">askVerifiy</button>
-    <button @click="postVerifiyData">postVerifiyData</button>
     <button @click="getAssets">getAssets</button>
-    <button @click="sign">sign</button>
+    <button @click="postVerifiyData">postVerifiyData</button>
   </div>
 </template>
 
@@ -16,6 +15,10 @@ export default {
   setup() {
     return {
       provider: null,
+      targetArgs: '',
+      targetTokenId: -1,
+      pass: false,
+      ntfArgs: '',
     }
   },
   mounted() {
@@ -32,26 +35,39 @@ export default {
       await Sea.login()
     },
     async getActivity() {
-      await Sea.getActivity()
+      const data = await Sea.getActivity()
+      for (const item of data) {
+        console.log(item)
+        this.targetArgs = item.nftTypeArgs
+        this.tokenId = item.tokenId
+      }
     },
     async askVerifiy() {
-      await Sea.askVerifiy(this.provider._address.addressString, 1)
+      console.log('[address]', this.provider._address.addressString)
+      let address = this.provider._address.addressString
+      if (!address)
+        address =
+          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47dusc6l0nlyv80d3dn78qtd8e4kryxgtj5e7mdh6'
+      await Sea.askVerifiy(address, 4)
     },
     async postVerifiyData() {
       const data = {
-        address: '111',
-        tokenId: 1,
-        activity: 11,
-        pass: true,
+        address: this.provider._address.addressString,
+        ntfArgs: this.ntfArgs,
+        activity: 4,
+        pass: this.pass,
       }
       await Sea.postVerifiyData(data)
     },
     async getAssets() {
       console.log(this.provider._address.addressString)
-      await Sea.getAssets(this.provider._address.addressString)
-    },
-    sign() {
-      console.log('sign')
+      const data = await Sea.getAssets(
+        this.provider._address.addressString,
+        this.targetArgs,
+        this.targetTokenId,
+      )
+      this.pass = data.pass
+      this.ntfArgs = data.nftArgs
     },
   },
 }
