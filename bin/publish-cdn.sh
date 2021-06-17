@@ -4,6 +4,8 @@ echo "NODE_ENV = ${NODE_ENV}"
 if [ -f ".env.${NODE_ENV}" ]
 then
   export $(cat .env.${NODE_ENV} | sed 's/#.*//g' | xargs)
+  rm .env
+  ln -s .env.${NODE_ENV} .env
 fi
 
 TARGET="$SSH_USER@$SSH_DOMAIN"

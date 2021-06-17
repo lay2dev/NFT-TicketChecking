@@ -8,7 +8,7 @@ const http = HTTP.createServer(app)
 app.use(express.static(__dirname + '/dist'))
 
 // listen 函数监听端口
-const server = http.listen(3000, '0.0.0.0', function() {
+const server = http.listen(3000, '0.0.0.0', function () {
   let ip = server.address().address
   const obj = require('os').networkInterfaces()
   for (const k in obj) {

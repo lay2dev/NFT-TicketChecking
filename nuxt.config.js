@@ -5,7 +5,7 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'NFT-TicketChecking',
+    title: 'NFT Gift',
     meta: [
       { charset: 'utf-8' },
       {
@@ -28,10 +28,15 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: ['element-ui/lib/theme-chalk/index.css'],
+  css: ['@assets/css/main.css'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ['~/plugins/element-ui', '~/plugins/api'],
+  plugins: [
+    '~/plugins/element-ui',
+    '~/plugins/main',
+    '~/plugins/bigsea',
+    '~/plugins/socket',
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -78,5 +83,11 @@ export default {
   // eslint
   eslint: {
     fix: true,
+  },
+
+  // server
+  server: {
+    host: '0.0.0.0',
+    port: 3002,
   },
 }

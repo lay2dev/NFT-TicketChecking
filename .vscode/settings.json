@@ -1,21 +1,13 @@
 {
-  "atomKeymap.promptV3Features": true,
   "editor.multiCursorModifier": "ctrlCmd",
   "editor.foldingStrategy": "indentation",
   "editor.formatOnPaste": true,
   "editor.minimap.enabled": false,
   "editor.formatOnSave": true,
   "git.enableSmartCommit": true,
-  "git.confirmSync": false,
   "git.autofetch": true,
-  "vetur.ignoreProjectWarning": true,
-  "breadcrumbs.enabled": false,
-  "window.zoomLevel": 1,
-  "window.title": "${dirty}${separator}${rootName}${separator}",
-  "workbench.colorTheme": "Atom One Light",
   "files.eol": "\n",
   "files.trimTrailingWhitespace": true,
-  "terminal.integrated.defaultProfile.windows": "Git Bash",
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },

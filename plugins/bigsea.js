@@ -4,7 +4,7 @@ import PWCore, { ChainID, IndexerCollector } from '@lay2/pw-core'
 import UnipassProvider from '~/assets/js/unipass/UnipassProvider.ts'
 import { authNFT } from '~/assets/js/ticket/auth'
 
-Sea.Ajax.HOST = process.env.NFT_GIFT
+Sea.Ajax.HOST = process.env.NFT_GIFT_API_URL
 
 Sea.checkLogin = () => {
   const provider = Sea.localStorage('provider')
