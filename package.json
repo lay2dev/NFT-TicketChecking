@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "nuxt",
-    "build": "nuxt generate",
+    "build": "cross-env NODE_ENV=example nuxt generate ",
     "preview": "node preview.js",
     "publish": "cross-env NODE_ENV=test sh bin/publish-cdn.sh",
     "lint": "eslint --fix --ext \".js,.vue\" --ignore-path .gitignore .",
