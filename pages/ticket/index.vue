@@ -53,18 +53,16 @@ export default {
       const data = {
         address: this.provider._address.addressString,
         activity: 4,
-        authData: this.authData,
+        list: this.authData,
+        targetTokenID: this.targetTokenId,
+        targetArgs: this.targetArgs,
       }
       const res = await Sea.postVerifiyData(data)
       console.log('[postVerifiyData]', res)
     },
     async getAssets() {
       console.log(this.provider._address.addressString)
-      const data = await Sea.getAssets(
-        this.provider._address.addressString,
-        this.targetArgs,
-        this.targetTokenId,
-      )
+      const data = await Sea.getAssets(this.provider._address.addressString)
       this.authData = data
     },
   },

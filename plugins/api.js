@@ -72,8 +72,16 @@ Sea.askVerifiy = async (address, activity) => {
   return res
 }
 
-Sea.postVerifiyData = async ({ address, activity, authData }) => {
-  console.log('askVerifiy', provider.pubkey)
+Sea.postVerifiyData = async ({
+  address,
+  activity,
+  targetTokenID,
+  list,
+  targetArgs,
+}) => {
+  const authData = await authNFT(list, targetArgs, targetTokenID)
+  console.log(authData)
+  console.log('askVerifiy', targetArgs)
   if (!authData || authData.sig === 'N/A' || authData.sig === '0x01N/A') {
     return { pass: false }
   }
@@ -93,8 +101,8 @@ Sea.postVerifiyData = async ({ address, activity, authData }) => {
   return res
 }
 
-Sea.getAssets = async (address, targetArgs, targetTokenID) => {
-  console.log('getAssets', targetArgs)
+Sea.getAssets = async (address) => {
+  console.log('getAssets', address)
   const res = await Sea.Ajax({
     url: '/ckb',
     data: {
@@ -102,7 +110,5 @@ Sea.getAssets = async (address, targetArgs, targetTokenID) => {
     },
   })
   console.log('[getAssets]', res)
-  const data = await authNFT(res, targetArgs, targetTokenID)
-  console.log(data)
-  return data
+  return res
 }
