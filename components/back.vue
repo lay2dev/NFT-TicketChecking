@@ -1,7 +1,7 @@
 <template>
   <div id="component-back">
-    <div class="left" @click="$emit('click')">
-      <img src="~/assets/img/back.svg" alt="back" @click="bindBack" />
+    <div class="left" @click="bindBack">
+      <img src="~/assets/img/back.svg" alt="back" />
     </div>
     <div class="right">
       <slot />
@@ -18,7 +18,9 @@ export default {
   },
   methods: {
     bindBack() {
-      if (!this.stop) {
+      if (this.stop) {
+        this.$emit('click')
+      } else {
         this.$router.back()
       }
     },

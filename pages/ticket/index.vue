@@ -4,7 +4,7 @@
     <div class="page-title">{{ card.title }}</div>
     <div class="card-box">
       <div class="card">
-        <img :src="card.banner" alt="card" />
+        <img class="banner" :src="card.banner" alt="card" />
         <div class="content">
           <div class="name">{{ card.nft.name }}</div>
           <div class="description">{{ card.nft.description }}</div>
@@ -20,6 +20,13 @@
               验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
             </div>
             <div class="show">请对工作人员出示此页面</div>
+          </template>
+          <template v-if="status === 'qrcode'">
+            <img :src="QRCode" alt="QRCode" />
+            <div class="tip">
+              验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
+            </div>
+            <div class="show">请向工作人员出示此二维码</div>
           </template>
           <template v-else>
             <div class="status">待验票</div>
@@ -39,6 +46,7 @@
   </div>
 </template>
 <script>
+import QRCode from 'qrcode'
 import dayjs from 'dayjs'
 import back from '~/components/back.vue'
 export default {
@@ -46,27 +54,44 @@ export default {
   data() {
     return {
       loading: false,
-      card: {},
+      card: {
+        nft: {},
+      },
+      provider: {},
       status: '',
+      QRCode: '',
     }
   },
   created() {
     const card = this.$store.state.card
-    if (card) {
+    const provider = this.$store.state.provider
+    if (card && provider) {
       this.card = card
+      this.provider = provider
     } else {
       this.$router.replace('/')
     }
   },
   methods: {
     dayjs,
-    bindCheck() {
+    async bindCheck() {
       this.loading = true
-      console.log('🌊', this.card)
-      setTimeout(() => {
-        this.loading = false
-        this.status = 'success'
-      }, 2000)
+      const data = await Sea.createSignMessage()
+      const { sig, timestamp } = data
+      const address = this.provider._address.addressString
+      console.log('check', sig, timestamp, address)
+      const url = `${window.location.origin}/check/addressString`
+      this.QRCode = await QRCode.toDataURL(url, {
+        type: 'image/png',
+        width: 240,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF',
+        },
+      })
+      this.status = 'qrcode'
+      this.loading = false
     },
     formatDate: Sea.formatDate,
   },
@@ -104,7 +129,7 @@ export default {
       position: relative;
       color: rgba(0, 0, 0, 0.85);
 
-      img {
+      img.banner {
         border-radius: 16px 16px 0 0;
         width: 100%;
         height: 51.2vw;
@@ -112,8 +137,8 @@ export default {
       }
 
       .content {
-        padding: 12px 16px;
-        margin-bottom: 16px;
+        padding: 12px 16px 28px;
+        border-bottom: 3px dashed rgba(210, 210, 210, 1);
 
         .name {
           color: rgba(0, 0, 0, 1);
@@ -139,7 +164,6 @@ export default {
         display: flex;
         flex-direction: column;
         align-items: center;
-        border-top: 3px dashed rgba(210, 210, 210, 1);
         width: 100%;
         min-height: 178px;
         position: relative;
@@ -195,6 +219,19 @@ export default {
         .show {
           color: rgba(0, 0, 0, 0.85);
           margin-top: 16px;
+        }
+      }
+
+      .check.qrcode {
+        img {
+          margin-top: 16px;
+          width: 120px;
+          height: 120px;
+        }
+
+        .show {
+          margin-top: 12px;
+          margin-bottom: 16px;
         }
       }
     }

@@ -1,5 +1,5 @@
 <template>
-  <div id="page-index">
+  <div id="page-index" v-loading="loading">
     <back />
     <div class="page-title">NFT 验票</div>
     <div class="cards">
@@ -28,157 +28,16 @@ export default {
   data() {
     return {
       loading: true,
-      provider: {},
       statusDict: {
         0: '进行中',
         1: '未开始',
         2: '已结束',
       },
-      cards: [
-        {
-          id: 8,
-          title: '我是中文标题',
-          banner: 'https://cdn.sea.team/lay2/2.png',
-          nftTypeArgs:
-            '0xcbdd0b6b31c77f63b51f776f1a58a8924ae6fa7c0000000400000007',
-          tokenId: -1,
-          startTime: '2021-06-17T02:00:00.000Z',
-          endTime: '2021-06-18T12:00:00.000Z',
-          describe: '我是活动地点',
-          describePicture: 'https://cdn.sea.team/lay2/1.png',
-          status: 0,
-          nft: {
-            total: 9,
-            issued: 9,
-            name: 'Do you understand？',
-            description: 'Game of Thrones',
-            renderer: 'https://i.loli.net/2021/04/30/1UAvKyawNjCMgHQ.gif',
-            issuerName: 'stitch',
-            issuerAvatarUrl:
-              'https://images.669pic.com/element_min_new_pic/74/45/47/87/35527c466c113c635dac7ffe63844024.png',
-          },
-        },
-        {
-          id: 4,
-          title: 'action title',
-          banner: 'https://cdn.sea.team/lay2/2.png',
-          nftTypeArgs:
-            '0xcbdd0b6b31c77f63b51f776f1a58a8924ae6fa7c0000000300000006',
-          tokenId: -1,
-          startTime: '2021-06-19T02:00:00.000Z',
-          endTime: '2021-06-19T12:00:00.000Z',
-          describe: 'action  start place',
-          describePicture: 'https://cdn.sea.team/lay2/1.png',
-          status: 1,
-          nft: {
-            total: 9,
-            issued: 9,
-            name: 'Keep quite',
-            description: 'Game of Thrones',
-            renderer:
-              'https://missfayealexander.files.wordpress.com/2015/02/cersei.gif',
-            issuerName: 'stitch',
-            issuerAvatarUrl:
-              'https://images.669pic.com/element_min_new_pic/74/45/47/87/35527c466c113c635dac7ffe63844024.png',
-          },
-        },
-        {
-          id: 5,
-          title: 'action title 22',
-          banner: 'https://cdn.sea.team/lay2/2.png',
-          nftTypeArgs: '0xcbdd0b6b31c77f63b51f776f1a58a8924ae6fa7c0000000f',
-          tokenId: -1,
-          startTime: '2021-06-18T02:00:00.000Z',
-          endTime: '2021-06-18T12:00:00.000Z',
-          describe: 'action  start place 22',
-          describePicture: 'https://cdn.sea.team/lay2/1.png',
-          status: 1,
-          nft: {
-            total: 0,
-            issued: 23,
-            name: '海贼王',
-            description: '海贼王',
-            renderer:
-              'https://goldenlegend.oss-cn-hangzhou.aliyuncs.com/production/ef6bd3a4-7e6b-4761-8d84-2a85bdbe901c.jpg',
-            issuerName: 'stitch',
-            issuerAvatarUrl:
-              'https://images.669pic.com/element_min_new_pic/74/45/47/87/35527c466c113c635dac7ffe63844024.png',
-          },
-        },
-        {
-          id: 6,
-          title: '我是中文标题',
-          banner: 'https://cdn.sea.team/lay2/2.png',
-          nftTypeArgs: '0xcbdd0b6b31c77f63b51f776f1a58a8924ae6fa7c0000000f',
-          tokenId: -1,
-          startTime: '2021-06-18T02:00:00.000Z',
-          endTime: '2021-06-18T12:00:00.000Z',
-          describe: 'action  start place 22',
-          describePicture: 'https://cdn.sea.team/lay2/1.png',
-          status: 1,
-          nft: {
-            total: 0,
-            issued: 23,
-            name: '海贼王',
-            description: '海贼王',
-            renderer:
-              'https://goldenlegend.oss-cn-hangzhou.aliyuncs.com/production/ef6bd3a4-7e6b-4761-8d84-2a85bdbe901c.jpg',
-            issuerName: 'stitch',
-            issuerAvatarUrl:
-              'https://images.669pic.com/element_min_new_pic/74/45/47/87/35527c466c113c635dac7ffe63844024.png',
-          },
-        },
-        {
-          id: 7,
-          title: '我是中文标题',
-          banner: 'https://cdn.sea.team/lay2/2.png',
-          nftTypeArgs:
-            '0xcbdd0b6b31c77f63b51f776f1a58a8924ae6fa7c0000000400000007',
-          tokenId: -1,
-          startTime: '2021-06-18T02:00:00.000Z',
-          endTime: '2021-06-18T12:00:00.000Z',
-          describe: '我是活动地点',
-          describePicture: 'https://cdn.sea.team/lay2/1.png',
-          status: 1,
-          nft: {
-            total: 9,
-            issued: 9,
-            name: 'Do you understand？',
-            description: 'Game of Thrones',
-            renderer: 'https://i.loli.net/2021/04/30/1UAvKyawNjCMgHQ.gif',
-            issuerName: 'stitch',
-            issuerAvatarUrl:
-              'https://images.669pic.com/element_min_new_pic/74/45/47/87/35527c466c113c635dac7ffe63844024.png',
-          },
-        },
-        {
-          id: 3,
-          title: 'ddd',
-          banner: 'https://cdn.sea.team/lay2/2.png',
-          nftTypeArgs: '0xcbdd0b6b31c77f63b51f776f1a58a8924ae6fa7c0000000f',
-          tokenId: -1,
-          startTime: '2021-06-15T07:00:00.000Z',
-          endTime: '2021-06-16T15:00:00.000Z',
-          describe: 'ddd',
-          describePicture: 'https://cdn.sea.team/lay2/1.png',
-          status: 2,
-          nft: {
-            total: 0,
-            issued: 23,
-            name: '海贼王',
-            description: '海贼王',
-            renderer:
-              'https://goldenlegend.oss-cn-hangzhou.aliyuncs.com/production/ef6bd3a4-7e6b-4761-8d84-2a85bdbe901c.jpg',
-            issuerName: 'stitch',
-            issuerAvatarUrl:
-              'https://images.669pic.com/element_min_new_pic/74/45/47/87/35527c466c113c635dac7ffe63844024.png',
-          },
-        },
-      ],
+      cards: [],
     }
   },
   mounted() {
-    // this.init()
+    this.init()
   },
   methods: {
     bindCard(card) {
@@ -187,13 +46,15 @@ export default {
     },
     formatDate: Sea.formatDate,
     async init() {
+      this.loading = true
       const provider = await Sea.login()
       if (provider) {
-        this.provider = provider
-        this.initList()
+        this.$store.state.provider = provider
+        await this.initList()
       } else {
-        this.login()
+        this.init()
       }
+      this.loading = false
     },
     async initList() {
       const cards = await Sea.getActivity()
@@ -221,6 +82,7 @@ export default {
     align-items: center;
     flex-direction: column;
     padding-bottom: 60px;
+    min-height: 500px;
 
     .card {
       cursor: pointer;
