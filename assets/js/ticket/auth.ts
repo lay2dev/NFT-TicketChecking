@@ -1,5 +1,7 @@
 import { createHash } from 'crypto'
+import { Address, AddressType } from '@lay2/pw-core'
 import UnipassProvider from '../unipass/UnipassProvider'
+import { getAddressByPubkey } from '../utils/utils'
 
 interface NFT {
   classTypeArgs: string
@@ -18,11 +20,27 @@ export interface PushData {
   sig?: string
 }
 
-export async function authNFT(
+export async function encodeMessage() {
+  const message = {
+    timestamp: Date.now(),
+  }
+  const messageHash = createHash('SHA256')
+    .update(JSON.stringify(message))
+    .digest('hex')
+    .toString()
+  console.log('[encodeMessage]', message)
+  const sig = await new UnipassProvider(process.env.UNIPASS_URL).sign(
+    messageHash,
+  )
+  console.log('[encodeMessage]', sig)
+  return { sig, timestamp: message.timestamp }
+}
+
+export function authNFT(
   list: NFT[],
   targetArgs: string,
   targetTokenID: number,
-): Promise<PushData> {
+) {
   console.log('[targetArgs]', targetArgs)
   const targetTypeArgs = targetArgs.slice(2)
   const targetIssuerID = targetTypeArgs.slice(0, 40)
@@ -50,30 +68,13 @@ export async function authNFT(
     outPoint = item.outPoint
     break
   }
-  if (pass) {
-    const data = { pass, nftArgs, outPoint: JSON.stringify(outPoint) }
-    return await decodeAuth(JSON.stringify(outPoint), data)
-  }
   return { pass, nftArgs, outPoint: JSON.stringify(outPoint) }
 }
 
-async function decodeAuth(outPoint: string, data: PushData): Promise<PushData> {
-  const now = Date.now()
-  const message = {
-    now,
-    outPoint,
-  }
-  const messageHash = createHash('SHA256')
-    .update(JSON.stringify(message))
-    .digest('hex')
-    .toString()
-  console.log(message)
-  data.messageHash = messageHash
-  const sig = await new UnipassProvider(process.env.UNIPASS_URL).sign(
-    messageHash,
-  )
-  console.log(sig)
-  data.sig = sig
-
-  return data
+export function authAdrress(masterkey: string, address: string): boolean {
+  const pushAddress = new Address(address, AddressType.ckb)
+  const pubkeyAddressStr = getAddressByPubkey(masterkey)
+  const pubkeyAddress = new Address(pubkeyAddressStr, AddressType.ckb)
+  if (pubkeyAddress.lockArgs !== pushAddress.lockArgs) return false
+  return true
 }

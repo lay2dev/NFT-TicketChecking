@@ -2,7 +2,7 @@ import '~/assets/js/utils/bigsea'
 import dayjs from 'dayjs'
 import PWCore, { ChainID, IndexerCollector } from '@lay2/pw-core'
 import UnipassProvider from '~/assets/js/unipass/UnipassProvider.ts'
-import { authNFT } from '~/assets/js/ticket/auth'
+import { authNFT, encodeMessage } from '~/assets/js/ticket/auth'
 
 Sea.Ajax.HOST = process.env.NFT_GIFT_API_URL
 
@@ -111,4 +111,11 @@ Sea.getAssets = async (address) => {
   })
   console.log('[getAssets]', res)
   return res
+}
+
+Sea.createSignMessage = async (address) => {
+  console.log('createSignMessage', address)
+  const data = await encodeMessage()
+  console.log('[createSignMessage]', data)
+  return data
 }

@@ -3,9 +3,23 @@
     test
     <button @click="login">login</button>
     <button @click="getActivity">getActivityList</button>
-    <button @click="askVerifiy">askVerifiy</button>
-    <button @click="getAssets">getAssets</button>
-    <button @click="postVerifiyData">postVerifiyData</button>
+    <!-- <button @click="askVerifiy">askVerifiy</button> -->
+
+    <div>
+      <button @click="createCardInfo">签名生成二维码</button>
+      <div>二维码信息 address：</div>
+      <div>{{ address }}</div>
+      <div>二维码信息 timestamp：</div>
+      <div>{{ timestamp }}</div>
+      <div>二维码信息 signature</div>
+      <div>{{ sig }}</div>
+    </div>
+
+    <div>
+      <input v-model="targetArgs" placeholder="输入待验证的NFTargs" />
+      <button @click="postVerifiyData">开始验证</button>
+      <button @click="getAssets">getAssets</button>
+    </div>
   </div>
 </template>
 
@@ -18,6 +32,9 @@ export default {
       targetArgs: '',
       targetTokenId: -1,
       authData: null,
+      address: '',
+      timestamp: '',
+      sig: '',
     }
   },
   mounted() {
@@ -64,6 +81,16 @@ export default {
       console.log(this.provider._address.addressString)
       const data = await Sea.getAssets(this.provider._address.addressString)
       this.authData = data
+    },
+    async createCardInfo() {
+      console.log('createCardInfo')
+      const data = await Sea.createSignMessage()
+      this.address = this.provider._address.addressString
+      this.sig = data.sig
+      this.timestamp = data.timestamp
+      console.log('this.address', this.address)
+      console.log('this.address', this.sig)
+      console.log('this.address', this.timestamp)
     },
   },
 }
