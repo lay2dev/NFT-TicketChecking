@@ -107,11 +107,19 @@ Sea.getShortKeyInfoData = async ({ key }) => {
   return res
 }
 
-Sea.getAssetsAndAuthNFT = async (address, targetArgs, targetTokenID, sig) => {
+Sea.getAssetsAndAuthNFT = async (
+  address,
+  targetArgs,
+  targetTokenID,
+  sig,
+  messageHash,
+) => {
   console.log('[getAssets]')
-  let pass = verifier(messageHash, sig)
-  console.log('[getAssets]-verifierSign:', verifierSign)
-  if (!pass) return { pass }
+  try {
+    const pass = verifier(messageHash, sig)
+    console.log('[getAssets]-verifierSign:', verifierSign)
+    if (!pass) return { pass }
+  } catch (e) {}
 
   const res = await Sea.Ajax({
     url: '/ckb',
@@ -121,14 +129,14 @@ Sea.getAssetsAndAuthNFT = async (address, targetArgs, targetTokenID, sig) => {
     },
   })
   console.log('[getAssets]- nft len is', res.length)
-  pass = await authHaveTargetNFT(res, targetArgs, targetTokenID)
-  console.log('[getAssets]- have  target nft', pass)
-  if (!pass) return { pass }
+  const data = await authHaveTargetNFT(res, targetArgs, targetTokenID)
+  console.log('[getAssets]- have  target nft', data.pass)
+  if (!data.pass) return data
 
-  pass = authAdrress(sig, address)
-  if (!pass) return { pass }
+  const pass = authAdrress(sig, address)
+  if (!pass) return data
 
-  return { pass }
+  return data
 }
 
 Sea.createSignMessage = async (address) => {
@@ -154,4 +162,13 @@ Sea.formatDate = (card) => {
     end = endDate.format('M月D日 HH:mm')
   }
   return `${start} - ${end}`
+}
+
+Sea.getClassArgs = () => {
+  const classArgs = Sea.localStorage('classArgs')
+  return classArgs
+}
+
+Sea.saveClassArgs = (classArgs) => {
+  Sea.localStorage('classArgs', classArgs)
 }

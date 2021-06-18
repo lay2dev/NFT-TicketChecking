@@ -16,29 +16,18 @@
           <div class="cricle right"></div>
           <template v-if="status === 'success'">
             <div class="status">恭喜您，验票成功！</div>
-            <div class="tip">
-              验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
-            </div>
+            <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div>
             <div class="show">请对工作人员出示此页面</div>
           </template>
           <template v-if="status === 'qrcode'">
             <img :src="QRCode" alt="QRCode" />
-            <div class="tip">
-              验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
-            </div>
+            <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div>
             <div class="show">请向工作人员出示此二维码</div>
           </template>
           <template v-else>
             <div class="status">待验票</div>
             <div class="tip">您需要持有图中指定 NFT，才能通过验证。</div>
-            <el-button
-              round
-              type="primary"
-              :loading="loading"
-              @click="bindCheck"
-            >
-              发起验票
-            </el-button>
+            <el-button round type="primary" :loading="loading" @click="bindCheck">发起验票</el-button>
           </template>
         </div>
       </div>
@@ -73,14 +62,27 @@ export default {
     }
   },
   methods: {
+    async getShortUrlKeyByInfo(data) {
+      console.log('[getShortUrlKeyInfo]')
+      const res = await Sea.getShortUrlKeyInfo({
+        address: this.address,
+        sig: this.sig,
+        timestamp: this.timestamp,
+        messageHash: this.messageHash,
+      })
+      this.key = res
+      console.log('[getShortUrlKeyInfo]', data)
+    },
     dayjs,
     async bindCheck() {
       this.loading = true
       const data = await Sea.createSignMessage()
-      const { sig, timestamp } = data
       const address = this.provider._address.addressString
       console.log('check', sig, timestamp, address)
-      const url = `${window.location.origin}/check/addressString`
+      Object.assign(data, { address })
+      const key = await getShortUrlKeyByInfo()
+
+      const url = `${window.location.origin}/check/${key}`
       this.QRCode = await QRCode.toDataURL(url, {
         type: 'image/png',
         width: 240,

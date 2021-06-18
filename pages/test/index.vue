@@ -66,6 +66,7 @@ export default {
     } else {
       this.login()
     }
+    this.targetArgs = Sea.getClassArgs()
   },
   methods: {
     async login() {
@@ -109,6 +110,7 @@ export default {
         this.sig,
         this.messageHash,
       )
+      Sea.saveClassArgs(this.targetArgs)
       console.log('createCardInfo', data)
     },
 

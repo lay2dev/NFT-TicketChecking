@@ -16,29 +16,18 @@
           <div class="cricle right"></div>
           <template v-if="status === 'success'">
             <div class="status">恭喜您，验票成功！</div>
-            <div class="tip">
-              验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
-            </div>
+            <!-- <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div> -->
             <div class="show">请对工作人员出示此页面</div>
           </template>
           <template v-if="status === 'qrcode'">
             <img :src="QRCode" alt="QRCode" />
-            <div class="tip">
-              验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
-            </div>
+            <!-- <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div> -->
             <div class="show">请向工作人员出示此二维码</div>
           </template>
           <template v-else>
             <div class="status">待验票</div>
             <div class="tip">您需要持有图中指定 NFT，才能通过验证。</div>
-            <el-button
-              round
-              type="primary"
-              :loading="loading"
-              @click="bindCheck"
-            >
-              发起验票
-            </el-button>
+            <!-- <el-button round type="primary" :loading="loading" @click="bindCheck">发起验票</el-button> -->
           </template>
         </div>
       </div>
@@ -46,7 +35,6 @@
   </div>
 </template>
 <script>
-import QRCode from 'qrcode'
 import dayjs from 'dayjs'
 import back from '~/components/back.vue'
 export default {
@@ -59,40 +47,72 @@ export default {
       },
       provider: {},
       status: '',
-      QRCode: '',
+      targetArgs: '',
+      targetTokenId: -1,
+      authData: null,
+      result: null,
     }
   },
   created() {
-    const card = Sea.localStorage('ticket')
-    console.log('🌊', card)
-    // const card = this.$store.state.card
-    // const provider = this.$store.state.provider
-    // if (card && provider) {
-    //   this.card = card
-    //   this.provider = provider
-    // } else {
-    //   this.$router.replace('/')
-    // }
+    const targetArgs = this.$store.state.classArgs
+    const provider = this.$store.state.provider
+    console.log('[created]', targetArgs, provider)
+
+    if (targetArgs && provider) {
+      this.targetArgs = targetArgs
+      this.provider = provider
+      const { key } = this.$route.query
+      this.getShortKeyInfoData(key)
+    } else {
+      this.login()
+    }
   },
   methods: {
     dayjs,
+    async login() {
+      console.log('login')
+      await Sea.login()
+    },
+    // get data
+    async getShortKeyInfoData(key) {
+      console.log('[getShortUrlKeyInfo]')
+      this.loading = true
+      const authData = await Sea.getShortKeyInfoData({
+        key,
+      })
+      // auth datat
+      this.authData = authData
+      console.log('[getShortUrlKeyInfo]', authData)
+      this.loading = false
+    },
+
+    // start verifiy
+    async startVerifiyQRData() {
+      console.log('[startVerifiyQRData]', this.provider._address.addressString)
+      if (!this.targetArgs) return
+      const data = await Sea.getAssetsAndAuthNFT(
+        this.provider._address.addressString,
+        this.targetArgs,
+        this.targetTokenId,
+        this.authData.sig,
+        this.authData.messageHash,
+      )
+      Sea.saveClassArgs(this.targetArgs)
+      this.$store.commit('classArgs', this.targetArgs)
+      console.log('[startVerifiyQRData]', data)
+
+      this.loading = false
+    },
+
     async bindCheck() {
       this.loading = true
-      const data = await Sea.createSignMessage()
-      const { sig, timestamp } = data
-      const address = this.provider._address.addressString
-      console.log('check', sig, timestamp, address)
-      const url = `${window.location.origin}/check/addressString`
-      this.QRCode = await QRCode.toDataURL(url, {
-        type: 'image/png',
-        width: 240,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF',
-        },
-      })
-      this.status = 'qrcode'
+      // todo get auth data from key
+
+      const { pass, ticketId } = await this.startVerifiyQRData()
+      console.log(pass, ticketId)
+
+      // todo ui
+
       this.loading = false
     },
     formatDate: Sea.formatDate,

@@ -45,7 +45,7 @@ export function authHaveTargetNFT(
   const targetTypeArgs = targetArgs.slice(2)
   const targetIssuerID = targetTypeArgs.slice(0, 40)
   const targetClassID = targetTypeArgs.slice(40, 48)
-
+  let ticketId = 0
   let pass = false
   for (const item of list) {
     console.log(item)
@@ -59,11 +59,13 @@ export function authHaveTargetNFT(
     if (targetTokenID > 0) {
       if (tokenId !== targetTokenID) continue
       pass = true
+      ticketId = tokenId
     }
     pass = true
+    ticketId = tokenId
     break
   }
-  return pass
+  return { pass, ticketId }
 }
 
 export function authAdrress(signStr: string, address: string): boolean {
