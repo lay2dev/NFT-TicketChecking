@@ -63,14 +63,16 @@ export default {
     }
   },
   created() {
-    const card = this.$store.state.card
-    const provider = this.$store.state.provider
-    if (card && provider) {
-      this.card = card
-      this.provider = provider
-    } else {
-      this.$router.replace('/')
-    }
+    const card = Sea.localStorage('ticket')
+    console.log('🌊', card)
+    // const card = this.$store.state.card
+    // const provider = this.$store.state.provider
+    // if (card && provider) {
+    //   this.card = card
+    //   this.provider = provider
+    // } else {
+    //   this.$router.replace('/')
+    // }
   },
   methods: {
     dayjs,
