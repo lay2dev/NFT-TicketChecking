@@ -119,3 +119,21 @@ Sea.createSignMessage = async (address) => {
   console.log('[createSignMessage]', data)
   return data
 }
+
+Sea.formatDate = (card) => {
+  const startDate = dayjs(card.startTime)
+  const endDate = dayjs(card.endTime)
+  const isSameDay = startDate.isSame(endDate, 'day')
+  const isSameMonth = startDate.isSame(endDate, 'month')
+  const isSameYear = startDate.isSame(endDate, 'year')
+  const start = startDate.format('YYYY年M月D日 HH:mm')
+  let end = endDate.format('YYYY年M月D日 HH:mm')
+  if (isSameDay) {
+    end = endDate.format('HH:mm')
+  } else if (isSameMonth) {
+    end = endDate.format('D日 HH:mm')
+  } else if (isSameYear) {
+    end = endDate.format('M月D日 HH:mm')
+  }
+  return `${start} - ${end}`
+}

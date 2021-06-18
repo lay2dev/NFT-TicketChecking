@@ -5,7 +5,7 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'NFT Gift',
+    title: 'NFT Ticket Checking',
     meta: [
       { charset: 'utf-8' },
       {
