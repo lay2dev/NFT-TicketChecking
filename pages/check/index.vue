@@ -8,16 +8,22 @@
           <template v-if="status === 'success'">
             <img class="icon" src="~/assets/img/success.svg" />
             <div class="status">#{{ ticketId }}，验票成功!</div>
-            <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div>
+            <div class="tip">
+              验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
+            </div>
           </template>
           <template v-else-if="status === 'fail'">
             <img class="icon" src="~/assets/img/fail.svg" />
             <div class="status">验票失败!</div>
-            <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div>
+            <div class="tip">
+              验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
+            </div>
           </template>
           <template v-else>
             <div class="status">待验票中</div>
-            <el-button round type="primary" :loading="loading">验票中。。</el-button>
+            <el-button round type="primary" :loading="loading"
+              >验票中。。</el-button
+            >
           </template>
         </div>
       </div>
@@ -49,24 +55,15 @@ export default {
   },
   created() {
     const targetArgs = Sea.localStorage('classArgs')
-    const provider = Sea.localStorage('provider')
-    if (targetArgs && provider) {
+    if (targetArgs) {
       this.targetArgs = targetArgs
-      this.provider = provider
       this.bindCheck()
     } else if (!targetArgs) {
       this.open()
-    } else {
-      this.login()
     }
   },
   methods: {
     dayjs,
-    async login() {
-      console.log('login')
-      await Sea.login()
-    },
-
     // get data
     async getShortKeyInfoData() {
       console.log('[getShortUrlKeyInfo]', this.key)

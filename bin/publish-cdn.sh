@@ -26,7 +26,7 @@ ssh -t -p 22 $TARGET "cd /var/www/$SSH_DOMAIN &&mv dist/* ../$SSH_DOMAIN/"
 # 删除
 rm dist.tgz
 # 上传cdn
-node bin/publish-cdn.js
+# node bin/publish-cdn.js
 
 # 备注：上传公钥命令
 #  ssh-copy-id -i ~/.ssh/id_rsa.pub user@domain.com
