@@ -2,7 +2,7 @@ import '~/assets/js/utils/bigsea'
 import dayjs from 'dayjs'
 import PWCore, { ChainID, IndexerCollector } from '@lay2/pw-core'
 import UnipassProvider from '~/assets/js/unipass/UnipassProvider.ts'
-import { authNFT, encodeMessage } from '~/assets/js/ticket/auth'
+import { authHaveTargetNFT, encodeMessage } from '~/assets/js/ticket/auth'
 
 Sea.Ajax.HOST = process.env.NFT_GIFT_API_URL
 
@@ -72,44 +72,47 @@ Sea.askVerifiy = async (address, activity) => {
   return res
 }
 
-Sea.postVerifiyData = async ({
-  address,
-  activity,
-  targetTokenID,
-  list,
-  targetArgs,
-}) => {
-  const authData = await authNFT(list, targetArgs, targetTokenID)
-  console.log(authData)
-  console.log('askVerifiy', targetArgs)
-  if (!authData || authData.sig === 'N/A' || authData.sig === '0x01N/A') {
-    return { pass: false }
-  }
-
+Sea.getShortUrlKeyInfo = async ({ address, sig, timestamp }) => {
   const data = {
     address,
-    activity,
-    ...authData,
+    sig,
+    timestamp,
   }
-  console.log('[askVerifiy]', data)
+  console.log('[getShortUrlKeyInfo]', data)
   const res = await Sea.Ajax({
     url: '/ticket/vierfiy',
     method: 'post',
     data,
   })
-  console.log('[askVerifiy]', res)
+  console.log('[getShortUrlKeyInfo]', res)
   return res
 }
 
-Sea.getAssets = async (address) => {
-  console.log('getAssets', address)
+Sea.getShortKeyInfoData = async ({ key }) => {
+  const data = {
+    key,
+  }
+  console.log('[getShortKeyInfoData]', data)
+  const res = await Sea.Ajax({
+    url: '/ticket/vierfiy',
+    method: 'get',
+    data,
+  })
+  console.log('[getShortKeyInfoData]', res)
+  return res
+}
+
+Sea.getAssetsAndAuthNFT = async (address, targetArgs, targetTokenID) => {
+  console.log('[getAssets]', address)
   const res = await Sea.Ajax({
     url: '/ckb',
     data: {
-      address,
+      address:
+        'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47dkkf0uhnam8s995auftst7vu3j2067rpz28mx7v',
     },
   })
-  console.log('[getAssets]', res)
+  console.log('[getAssets]', targetArgs)
+  await authHaveTargetNFT(res, targetArgs, targetTokenID)
   return res
 }
 

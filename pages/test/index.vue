@@ -6,19 +6,31 @@
     <!-- <button @click="askVerifiy">askVerifiy</button> -->
 
     <div>
-      <button @click="createCardInfo">签名生成二维码</button>
+      <button @click="createCardInfo">签名生成二维码数据</button>
       <div>二维码信息 address：</div>
       <div>{{ address }}</div>
       <div>二维码信息 timestamp：</div>
       <div>{{ timestamp }}</div>
       <div>二维码信息 signature</div>
       <div>{{ sig }}</div>
+      <div>
+        <button @click="getShortUrlKeyInfo">获取生成二维码短链key</button>
+        <div>{{ key }}</div>
+      </div>
+      <div>
+        <button @click="getShortUrlKeyInfo">通过短链key获取验证数据</button>
+        <div>扫码信息 address：</div>
+        <div>{{ address1 }}</div>
+        <div>扫码信息 timestamp：</div>
+        <div>{{ timestamp1 }}</div>
+        <div>扫码信息 signature</div>
+        <div>{{ sig1 }}</div>
+      </div>
     </div>
 
     <div>
       <input v-model="targetArgs" placeholder="输入待验证的NFTargs" />
-      <button @click="postVerifiyData">开始验证</button>
-      <button @click="getAssets">getAssets</button>
+      <button @click="startVerifiyQRData">开始验证</button>
     </div>
   </div>
 </template>
@@ -26,7 +38,7 @@
 <script>
 export default {
   name: 'Test',
-  setup() {
+  data() {
     return {
       provider: null,
       targetArgs: '',
@@ -35,6 +47,10 @@ export default {
       address: '',
       timestamp: '',
       sig: '',
+      address1: '',
+      timestamp1: '',
+      sig1: '',
+      key: '',
     }
   },
   mounted() {
@@ -58,30 +74,13 @@ export default {
         this.tokenId = item.tokenId
       }
     },
-    async askVerifiy() {
-      console.log('[address]', this.provider._address.addressString)
-      let address = this.provider._address.addressString
-      if (!address)
-        address =
-          'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47dusc6l0nlyv80d3dn78qtd8e4kryxgtj5e7mdh6'
-      await Sea.askVerifiy(address, 4)
-    },
-    async postVerifiyData() {
-      const data = {
-        address: this.provider._address.addressString,
-        activity: 4,
-        list: this.authData,
-        targetTokenID: this.targetTokenId,
-        targetArgs: this.targetArgs,
-      }
-      const res = await Sea.postVerifiyData(data)
-      console.log('[postVerifiyData]', res)
-    },
+
     async getAssets() {
       console.log(this.provider._address.addressString)
       const data = await Sea.getAssets(this.provider._address.addressString)
       this.authData = data
     },
+
     async createCardInfo() {
       console.log('createCardInfo')
       const data = await Sea.createSignMessage()
@@ -91,6 +90,39 @@ export default {
       console.log('this.address', this.address)
       console.log('this.address', this.sig)
       console.log('this.address', this.timestamp)
+    },
+
+    async startVerifiyQRData() {
+      console.log('createCardInfo', this.address)
+      if (!this.targetArgs) return
+      const data = await Sea.getAssetsAndAuthNFT(
+        this.address,
+        this.targetArgs,
+        this.targetTokenId,
+      )
+      console.log('createCardInfo', data)
+    },
+
+    // save data to server get short url
+    async getShortUrlKeyInfo() {
+      console.log('[getShortUrlKeyInfo]')
+      const data = await Sea.getShortUrlKeyInfo({
+        address: this.address,
+        sig: this.sig,
+        timestamp: this.timestamp,
+      })
+      this.key = data
+      console.log('[getShortUrlKeyInfo]', data)
+    },
+
+    // save data from short key
+    async getShortKeyInfoData() {
+      console.log('[getShortUrlKeyInfo]')
+      const data = await Sea.getShortKeyInfoData({
+        key: this.key,
+      })
+      this.key = data
+      console.log('[getShortUrlKeyInfo]', data)
     },
   },
 }

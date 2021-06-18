@@ -36,7 +36,7 @@ export async function encodeMessage() {
   return { sig, timestamp: message.timestamp }
 }
 
-export function authNFT(
+export function authHaveTargetNFT(
   list: NFT[],
   targetArgs: string,
   targetTokenID: number,
@@ -47,9 +47,8 @@ export function authNFT(
   const targetClassID = targetTypeArgs.slice(40, 48)
 
   let pass = false
-  let nftArgs = '-'
-  let outPoint = {}
   for (const item of list) {
+    console.log(item)
     const typeArgs = item.nftTypeArgs.slice(2)
     const issuerId = typeArgs.slice(0, 40)
     const classId = typeArgs.slice(40, 48)
@@ -60,15 +59,11 @@ export function authNFT(
     if (targetTokenID > 0) {
       if (tokenId !== targetTokenID) continue
       pass = true
-      nftArgs = item.classTypeArgs
-      outPoint = item.outPoint
     }
     pass = true
-    nftArgs = item.classTypeArgs
-    outPoint = item.outPoint
     break
   }
-  return { pass, nftArgs, outPoint: JSON.stringify(outPoint) }
+  return pass
 }
 
 export function authAdrress(masterkey: string, address: string): boolean {
