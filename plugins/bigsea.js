@@ -117,7 +117,7 @@ Sea.getAssetsAndAuthNFT = async (
   console.log('[getAssets]')
   try {
     const pass = verifier(messageHash, sig)
-    console.log('[getAssets]-verifierSign:', verifierSign)
+    console.log('[getAssets]-verifierSign:', pass)
     if (!pass) return { pass }
   } catch (e) {}
 
