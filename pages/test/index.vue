@@ -107,6 +107,7 @@ export default {
         this.targetArgs,
         this.targetTokenId,
         this.sig,
+        this.messageHash,
       )
       console.log('createCardInfo', data)
     },

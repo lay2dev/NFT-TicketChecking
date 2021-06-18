@@ -7,6 +7,7 @@ import {
   encodeMessage,
   authAdrress,
 } from '~/assets/js/ticket/auth'
+import { verifier } from '~/assets/js/ticket/verifier'
 
 Sea.Ajax.HOST = process.env.NFT_GIFT_API_URL
 
@@ -108,6 +109,10 @@ Sea.getShortKeyInfoData = async ({ key }) => {
 
 Sea.getAssetsAndAuthNFT = async (address, targetArgs, targetTokenID, sig) => {
   console.log('[getAssets]')
+  let pass = verifier(messageHash, sig)
+  console.log('[getAssets]-verifierSign:', verifierSign)
+  if (!pass) return { pass }
+
   const res = await Sea.Ajax({
     url: '/ckb',
     method: 'get',
@@ -116,7 +121,7 @@ Sea.getAssetsAndAuthNFT = async (address, targetArgs, targetTokenID, sig) => {
     },
   })
   console.log('[getAssets]- nft len is', res.length)
-  let pass = await authHaveTargetNFT(res, targetArgs, targetTokenID)
+  pass = await authHaveTargetNFT(res, targetArgs, targetTokenID)
   console.log('[getAssets]- have  target nft', pass)
   if (!pass) return { pass }
 
