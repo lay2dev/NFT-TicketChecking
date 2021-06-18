@@ -77,11 +77,12 @@ Sea.askVerifiy = async (address, activity) => {
   return res
 }
 
-Sea.getShortUrlKeyInfo = async ({ address, sig, timestamp }) => {
+Sea.getShortUrlKeyInfo = async ({ address, sig, timestamp, messageHash }) => {
   const data = {
     address,
     sig,
     timestamp,
+    messageHash,
   }
   console.log('[getShortUrlKeyInfo]', data)
   const res = await Sea.Ajax({
