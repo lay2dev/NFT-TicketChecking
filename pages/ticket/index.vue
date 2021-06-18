@@ -63,26 +63,25 @@ export default {
   },
   methods: {
     async getShortUrlKeyByInfo(data) {
-      console.log('[getShortUrlKeyInfo]')
-      const res = await Sea.getShortUrlKeyInfo({
-        address: this.address,
-        sig: this.sig,
-        timestamp: this.timestamp,
-        messageHash: this.messageHash,
-      })
-      this.key = res
       console.log('[getShortUrlKeyInfo]', data)
+      const res = await Sea.getShortUrlKeyInfo({
+        address: data.address,
+        sig: data.sig,
+        messageHash: data.messageHash,
+      })
+      console.log('[getShortUrlKeyInfo]', res.key)
+      return res.key
     },
     dayjs,
     async bindCheck() {
       this.loading = true
       const data = await Sea.createSignMessage()
       const address = this.provider._address.addressString
-      console.log('check', sig, timestamp, address)
       Object.assign(data, { address })
-      const key = await getShortUrlKeyByInfo()
+      const key = await this.getShortUrlKeyByInfo(data)
 
-      const url = `${window.location.origin}/check/${key}`
+      const url = `${window.location.origin}/check?key=${key}`
+      console.log(url)
       this.QRCode = await QRCode.toDataURL(url, {
         type: 'image/png',
         width: 240,
