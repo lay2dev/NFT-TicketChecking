@@ -1,7 +1,7 @@
 import { createHash } from 'crypto'
 import { Address, AddressType } from '@lay2/pw-core'
 import UnipassProvider from '../unipass/UnipassProvider'
-import { getAddressByPubkey } from '../utils/utils'
+import { getAddressByPubkey, getDataFromSignString } from '../utils/utils'
 
 interface NFT {
   classTypeArgs: string
@@ -33,7 +33,7 @@ export async function encodeMessage() {
     messageHash,
   )
   console.log('[encodeMessage]', sig)
-  return { sig, timestamp: message.timestamp }
+  return { sig, timestamp: message.timestamp, messageHash }
 }
 
 export function authHaveTargetNFT(
@@ -66,10 +66,14 @@ export function authHaveTargetNFT(
   return pass
 }
 
-export function authAdrress(masterkey: string, address: string): boolean {
+export function authAdrress(signStr: string, address: string): boolean {
+  console.log('[authAdrress]')
+  const { masterkey } = getDataFromSignString(signStr)
   const pushAddress = new Address(address, AddressType.ckb)
   const pubkeyAddressStr = getAddressByPubkey(masterkey)
   const pubkeyAddress = new Address(pubkeyAddressStr, AddressType.ckb)
+  console.log('[authAdrress]-pubkeyAddress.lockArgs', pubkeyAddress.lockArgs)
+  console.log('[authAdrress]-pushAddress.lockArgs', pushAddress.lockArgs)
   if (pubkeyAddress.lockArgs !== pushAddress.lockArgs) return false
   return true
 }

@@ -1,4 +1,5 @@
 import {
+  Address,
   Blake2bHasher,
   CellDep,
   ChainID,
@@ -11,6 +12,7 @@ import {
   Script,
 } from '@lay2/pw-core'
 import forge from 'node-forge'
+import { blake160 } from '@nervosnetwork/ckb-sdk-utils'
 
 interface UnipassData {
   masterkey: string
@@ -228,4 +230,16 @@ export function getPacketRandomList(
     }
   }
   return packe
+}
+
+export function getAddressPubkey(pubkey: string): Address {
+  const args = '0x' + blake160('0x' + pubkey.replace('0x', ''), 'hex')
+  return getAddressByPubkeyHash(args)
+}
+
+function getAddressByPubkeyHash(pubkeyHash: string): Address {
+  const UnipassLockCodeHash = process.env.UNIPASS_TYPE_ID as string
+  const lock = new Script(UnipassLockCodeHash, pubkeyHash, HashType.type)
+  const address = lock.toAddress()
+  return address
 }

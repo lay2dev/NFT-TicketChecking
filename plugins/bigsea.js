@@ -2,7 +2,11 @@ import '~/assets/js/utils/bigsea'
 import dayjs from 'dayjs'
 import PWCore, { ChainID, IndexerCollector } from '@lay2/pw-core'
 import UnipassProvider from '~/assets/js/unipass/UnipassProvider.ts'
-import { authHaveTargetNFT, encodeMessage } from '~/assets/js/ticket/auth'
+import {
+  authHaveTargetNFT,
+  encodeMessage,
+  authAdrress,
+} from '~/assets/js/ticket/auth'
 
 Sea.Ajax.HOST = process.env.NFT_GIFT_API_URL
 
@@ -102,18 +106,24 @@ Sea.getShortKeyInfoData = async ({ key }) => {
   return res
 }
 
-Sea.getAssetsAndAuthNFT = async (address, targetArgs, targetTokenID) => {
-  console.log('[getAssets]', address)
+Sea.getAssetsAndAuthNFT = async (address, targetArgs, targetTokenID, sig) => {
+  console.log('[getAssets]')
   const res = await Sea.Ajax({
     url: '/ckb',
+    method: 'get',
     data: {
-      address:
-        'ckt1qsfy5cxd0x0pl09xvsvkmert8alsajm38qfnmjh2fzfu2804kq47dkkf0uhnam8s995auftst7vu3j2067rpz28mx7v',
+      address,
     },
   })
-  console.log('[getAssets]', targetArgs)
-  await authHaveTargetNFT(res, targetArgs, targetTokenID)
-  return res
+  console.log('[getAssets]- nft len is', res.length)
+  let pass = await authHaveTargetNFT(res, targetArgs, targetTokenID)
+  console.log('[getAssets]- have  target nft', pass)
+  if (!pass) return { pass }
+
+  pass = authAdrress(sig, address)
+  if (!pass) return { pass }
+
+  return { pass }
 }
 
 Sea.createSignMessage = async (address) => {

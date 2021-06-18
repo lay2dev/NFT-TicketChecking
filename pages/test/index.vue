@@ -13,6 +13,8 @@
       <div>{{ timestamp }}</div>
       <div>二维码信息 signature</div>
       <div>{{ sig }}</div>
+      <div>扫码信息 messageHash</div>
+      <div>{{ messageHash }}</div>
       <div>
         <button @click="getShortUrlKeyInfo">获取生成二维码短链key</button>
         <div>{{ key }}</div>
@@ -25,6 +27,8 @@
         <div>{{ timestamp1 }}</div>
         <div>扫码信息 signature</div>
         <div>{{ sig1 }}</div>
+        <div>扫码信息 messageHash</div>
+        <div>{{ messageHash1 }}</div>
       </div>
     </div>
 
@@ -51,6 +55,8 @@ export default {
       timestamp1: '',
       sig1: '',
       key: '',
+      messageHash: '',
+      messageHash1: '',
     }
   },
   mounted() {
@@ -87,6 +93,7 @@ export default {
       this.address = this.provider._address.addressString
       this.sig = data.sig
       this.timestamp = data.timestamp
+      this.messageHash = data.messageHash
       console.log('this.address', this.address)
       console.log('this.address', this.sig)
       console.log('this.address', this.timestamp)
@@ -99,6 +106,7 @@ export default {
         this.address,
         this.targetArgs,
         this.targetTokenId,
+        this.sig,
       )
       console.log('createCardInfo', data)
     },
@@ -110,6 +118,7 @@ export default {
         address: this.address,
         sig: this.sig,
         timestamp: this.timestamp,
+        messageHash: this.messageHash,
       })
       this.key = data
       console.log('[getShortUrlKeyInfo]', data)
