@@ -1,33 +1,23 @@
 <template>
   <div id="page-ticket">
-    <back />
-    <div class="page-title">{{ card.title }}</div>
+    <div class="page-title">NFT验票</div>
+    <right @clear="open" />
     <div class="card-box">
       <div class="card">
-        <el-image class="banner" :src="card.banner" alt="card" />
-        <div class="content">
-          <div class="name">{{ card.nft.name }}</div>
-          <div class="description">{{ card.nft.description }}</div>
-          <div class="date">活动时间：{{ formatDate(card) }}</div>
-          <div class="address">活动地点：{{ card.describe }}</div>
-        </div>
         <div class="check" :class="status">
-          <div class="cricle left"></div>
-          <div class="cricle right"></div>
           <template v-if="status === 'success'">
-            <div class="status">恭喜您，验票成功！</div>
-            <!-- <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div> -->
-            <div class="show">请对工作人员出示此页面</div>
+            <img class="icon" src="~/assets/img/success.svg" />
+            <div class="status">#{{ ticketId }}，验票成功!</div>
+            <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div>
           </template>
-          <template v-if="status === 'qrcode'">
-            <img :src="QRCode" alt="QRCode" />
-            <!-- <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div> -->
-            <div class="show">请向工作人员出示此二维码</div>
+          <template v-else-if="status === 'fail'">
+            <img class="icon" src="~/assets/img/fail.svg" />
+            <div class="status">验票失败!</div>
+            <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div>
           </template>
           <template v-else>
-            <div class="status">待验票</div>
-            <div class="tip">您需要持有图中指定 NFT，才能通过验证。</div>
-            <!-- <el-button round type="primary" :loading="loading" @click="bindCheck">发起验票</el-button> -->
+            <div class="status">待验票中</div>
+            <el-button round type="primary" :loading="loading">验票中。。</el-button>
           </template>
         </div>
       </div>
@@ -36,33 +26,36 @@
 </template>
 <script>
 import dayjs from 'dayjs'
-import back from '~/components/back.vue'
+import right from '~/components/right.vue'
 export default {
-  components: { back },
+  components: { right },
   data() {
+    const { key } = this.$route.query
+    console.log(this.$route.query, key)
     return {
       loading: false,
       card: {
         nft: {},
       },
+      key,
       provider: {},
       status: '',
       targetArgs: '',
       targetTokenId: -1,
       authData: null,
       result: null,
+      ticketId: '',
     }
   },
   created() {
-    const targetArgs = this.$store.state.classArgs
-    const provider = this.$store.state.provider
-    console.log('[created]', targetArgs, provider)
-
+    const targetArgs = Sea.localStorage('classArgs')
+    const provider = Sea.localStorage('provider')
     if (targetArgs && provider) {
       this.targetArgs = targetArgs
       this.provider = provider
-      const { key } = this.$route.query
-      this.getShortKeyInfoData(key)
+      this.bindCheck()
+    } else if (!targetArgs) {
+      this.open()
     } else {
       this.login()
     }
@@ -73,49 +66,64 @@ export default {
       console.log('login')
       await Sea.login()
     },
+
     // get data
-    async getShortKeyInfoData(key) {
-      console.log('[getShortUrlKeyInfo]')
-      this.loading = true
+    async getShortKeyInfoData() {
+      console.log('[getShortUrlKeyInfo]', this.key)
       const authData = await Sea.getShortKeyInfoData({
-        key,
+        key: this.key,
       })
       // auth datat
       this.authData = authData
       console.log('[getShortUrlKeyInfo]', authData)
-      this.loading = false
     },
 
     // start verifiy
     async startVerifiyQRData() {
-      console.log('[startVerifiyQRData]', this.provider._address.addressString)
+      console.log('[startVerifiyQRData]', this.authData.address)
       if (!this.targetArgs) return
       const data = await Sea.getAssetsAndAuthNFT(
-        this.provider._address.addressString,
+        this.authData.address,
         this.targetArgs,
-        this.targetTokenId,
+        this.authData.targetTokenId,
         this.authData.sig,
         this.authData.messageHash,
       )
-      Sea.saveClassArgs(this.targetArgs)
-      this.$store.commit('classArgs', this.targetArgs)
       console.log('[startVerifiyQRData]', data)
-
       this.loading = false
+      return data
     },
 
     async bindCheck() {
       this.loading = true
       // todo get auth data from key
-
+      await this.getShortKeyInfoData()
       const { pass, ticketId } = await this.startVerifiyQRData()
-      console.log(pass, ticketId)
-
-      // todo ui
-
+      console.log('[bindCheck]', pass, ticketId)
+      pass ? (this.status = 'success') : (this.status = 'fail')
       this.loading = false
+      console.log('[bindCheck]', this.status)
+      this.ticketId = ticketId
     },
     formatDate: Sea.formatDate,
+
+    open() {
+      this.$prompt('请输入要验证的NFT信息', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputValue: this.targetArgs,
+      })
+        .then(({ value }) => {
+          this.targetArgs = value
+          Sea.localStorage('classArgs', this.targetArgs)
+          this.$message({
+            type: 'success',
+            message: '输入要验证的NFT信息是: ' + value,
+          })
+          this.bindCheck()
+        })
+        .catch(() => {})
+    },
   },
 }
 </script>
@@ -136,6 +144,43 @@ export default {
     line-height: 35px;
   }
 
+  .box.password {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+    padding: 14px 12px;
+    margin-top: 31px;
+
+    span {
+      align-self: flex-start;
+    }
+
+    /* Chrome/Opera/Safari */
+    input::-webkit-input-placeholder {
+      color: rgba(210, 123, 48, 0.6);
+    }
+
+    /* Firefox 19+ */
+    input::-moz-placeholder {
+      color: rgba(210, 123, 48, 0.6);
+    }
+
+    /* IE 10+ */
+    input:-ms-input-placeholder {
+      color: rgba(210, 123, 48, 0.6);
+    }
+
+    /* Firefox 18- */
+    input:-moz-placeholder {
+      color: rgba(210, 123, 48, 0.6);
+    }
+
+    .tip {
+      font-size: 12px;
+    }
+  }
+
   .card-box {
     flex: 1;
     display: flex;
@@ -154,7 +199,6 @@ export default {
       .banner {
         border-radius: 16px 16px 0 0;
         width: 100%;
-        height: 51.2vw;
         object-fit: cover;
       }
 
@@ -186,38 +230,22 @@ export default {
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 100%;
-        min-height: 178px;
+        width: 100vm;
+        height: 65vh;
+        justify-content: center;
         position: relative;
-
-        .cricle {
-          box-shadow: inset 0px 0px 24px 0px rgba(61, 135, 234, 0.25);
-          position: absolute;
-          top: -16px;
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          background: #f7f8f9;
-        }
-
-        .cricle.left {
-          left: -16px;
-        }
-
-        .cricle.right {
-          right: -16px;
-        }
 
         .status {
           margin-top: 28px;
           font-weight: bold;
           color: rgba(255, 164, 0, 100);
-          font-size: 20px;
+          font-size: 30px;
         }
 
         .tip {
           margin-top: 8px;
           color: rgba(0, 0, 0, 0.45);
+          font-size: 20px;
         }
 
         .el-button {
@@ -244,6 +272,21 @@ export default {
         }
       }
 
+      .check.fail {
+        .status {
+          color: #f00;
+        }
+
+        .tip {
+          margin-top: 16px;
+        }
+
+        .show {
+          color: rgba(0, 0, 0, 0.85);
+          margin-top: 16px;
+        }
+      }
+
       .check.qrcode {
         img {
           margin-top: 16px;
@@ -255,6 +298,16 @@ export default {
           margin-top: 12px;
           margin-bottom: 16px;
         }
+      }
+
+      .icon {
+        margin-top: 16px;
+        width: 40%;
+        height: 40%;
+      }
+
+      svg g polyline {
+        stroke: red;
       }
     }
   }

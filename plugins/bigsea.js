@@ -115,12 +115,14 @@ Sea.getAssetsAndAuthNFT = async (
   sig,
   messageHash,
 ) => {
-  console.log('[getAssets]')
+  console.log('[getAssets]', messageHash, sig)
   try {
     const pass = verifier(messageHash, sig)
     console.log('[getAssets]-verifierSign:', pass)
     if (!pass) return { pass }
-  } catch (e) {}
+  } catch (e) {
+    console.log(e)
+  }
 
   const res = await Sea.Ajax({
     url: '/ckb',
@@ -131,7 +133,7 @@ Sea.getAssetsAndAuthNFT = async (
   })
   console.log('[getAssets]- nft len is', res.length)
   const data = await authHaveTargetNFT(res, targetArgs, targetTokenID)
-  console.log('[getAssets]- have  target nft', data.pass)
+  console.log('[getAssets]- have  target nft', data)
   if (!data.pass) return data
 
   const pass = authAdrress(sig, address)
