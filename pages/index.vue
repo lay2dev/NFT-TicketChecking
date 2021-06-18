@@ -36,6 +36,12 @@ export default {
       cards: [],
     }
   },
+  created() {
+    const { address, email, phone } = this.$route.query
+    if (address) {
+      Sea.SaveDataByUrl(address, email || phone)
+    }
+  },
   mounted() {
     this.init()
   },

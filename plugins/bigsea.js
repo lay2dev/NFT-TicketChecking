@@ -1,6 +1,6 @@
 import '~/assets/js/utils/bigsea'
 import dayjs from 'dayjs'
-import PWCore, { ChainID, IndexerCollector } from '@lay2/pw-core'
+import PWCore, { ChainID, IndexerCollector, Address } from '@lay2/pw-core'
 import UnipassProvider from '~/assets/js/unipass/UnipassProvider.ts'
 import {
   authHaveTargetNFT,
@@ -10,6 +10,15 @@ import {
 import { verifier } from '~/assets/js/ticket/verifier'
 
 Sea.Ajax.HOST = process.env.NFT_GIFT_API_URL
+
+Sea.SaveDataByUrl = (address, email) => {
+  const provider = new UnipassProvider()
+  provider._time = Date.now()
+  provider._address = new Address(address)
+  provider._email = email || ''
+  Sea.localStorage('provider', provider)
+  return null
+}
 
 Sea.checkLogin = () => {
   const provider = Sea.localStorage('provider')
