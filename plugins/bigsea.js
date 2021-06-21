@@ -10,6 +10,8 @@ import {
 import { verifier } from '~/assets/js/ticket/verifier'
 
 Sea.Ajax.HOST = process.env.NFT_GIFT_API_URL
+PWCore.chainId =
+  process.env.CKB_CHAIN_ID === '0' ? ChainID.ckb : ChainID.ckb_testnet
 
 Sea.SaveDataByUrl = (address, email) => {
   const provider = new UnipassProvider()
