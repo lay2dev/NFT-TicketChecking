@@ -78,6 +78,14 @@ export default {
       const data = await Sea.createSignMessage()
       const address = this.provider._address.addressString
       Object.assign(data, { address })
+      if (data.sig.includes('N/A')) {
+        this.$message({
+          type: 'warn',
+          message: 'sign rejected',
+        })
+        this.loading = false
+        return
+      }
       const key = await this.getShortUrlKeyByInfo(data)
 
       const url = `${window.location.origin}/check?key=${key}`
