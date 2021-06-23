@@ -33,6 +33,7 @@
     "socket.io-client": "^4.1.2",
     "stylus": "^0.54.8",
     "stylus-loader": "4.3.3",
+    "urlencode": "^1.1.0",
     "v-clipboard": "^2.2.3",
     "vue-socket.io": "^3.0.10"
   },
@@ -40,6 +41,7 @@
     "@nuxt/types": "^2.15.3",
     "@nuxt/typescript-build": "^2.1.0",
     "@nuxtjs/dotenv": "^1.4.1",
+    "@types/urlencode": "^1.1.2",
     "@nuxtjs/eslint-config-typescript": "^6.0.0",
     "@nuxtjs/eslint-module": "^3.0.2",
     "@types/node-forge": "^0.9.9",

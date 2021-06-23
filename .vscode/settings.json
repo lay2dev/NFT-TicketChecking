@@ -2,7 +2,7 @@
   "editor.multiCursorModifier": "ctrlCmd",
   "editor.foldingStrategy": "indentation",
   "editor.formatOnPaste": true,
-  "editor.minimap.enabled": false,
+  "editor.minimap.enabled": true,
   "editor.formatOnSave": true,
   "git.enableSmartCommit": true,
   "git.autofetch": true,

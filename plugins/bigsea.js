@@ -1,6 +1,13 @@
 import '~/assets/js/utils/bigsea'
 import dayjs from 'dayjs'
-import PWCore, { ChainID, IndexerCollector, Address } from '@lay2/pw-core'
+import PWCore, { ChainID, Address } from '@lay2/pw-core'
+import { ActionType } from 'assets/js/url/interface'
+import {
+  restoreState,
+  getDataFromUrl,
+  getPubkey,
+  saveState,
+} from 'assets/js/url/state-data'
 import UnipassProvider from '~/assets/js/unipass/UnipassProvider.ts'
 import {
   authHaveTargetNFT,
@@ -14,12 +21,24 @@ PWCore.chainId =
   process.env.CKB_CHAIN_ID === '0' ? ChainID.ckb : ChainID.ckb_testnet
 
 Sea.SaveDataByUrl = (address, email) => {
-  const provider = new UnipassProvider()
-  provider._time = Date.now()
-  provider._address = new Address(address)
-  provider._email = email || ''
-  Sea.localStorage('provider', provider)
-  return null
+  if (address) {
+    const provider = new UnipassProvider()
+    provider._time = Date.now()
+    provider._address = new Address(address)
+    provider._email = email || ''
+    Sea.localStorage('provider', provider)
+  } else {
+    const pageState = restoreState(true)
+    console.log(pageState)
+    let action = ActionType.Init
+    if (pageState) action = pageState.action
+    if (action === ActionType.Init) {
+      getDataFromUrl(ActionType.Login)
+    } else if (action === ActionType.SignMsg) {
+      getDataFromUrl(ActionType.SignMsg)
+      return Sea.getSignData()
+    }
+  }
 }
 
 Sea.checkLogin = () => {
@@ -38,30 +57,16 @@ Sea.checkLogin = () => {
 }
 
 Sea.login = async () => {
-  let provider
-  provider = await Sea.checkLogin()
+  const provider = await Sea.checkLogin()
   if (provider) {
     return provider
   }
-  const url = {
-    NODE_URL: process.env.CKB_NODE_URL,
-    INDEXER_URL: process.env.CKB_INDEXER_URL,
-    CHAIN_ID:
-      process.env.CKB_CHAIN_ID === '0' ? ChainID.ckb : ChainID.ckb_testnet,
-  }
-  console.log(url)
-  await new PWCore(url.NODE_URL).init(
-    new UnipassProvider(process.env.UNIPASS_URL),
-    new IndexerCollector(url.INDEXER_URL),
-    url.CHAIN_ID,
-  )
-  provider = PWCore.provider
-  if (provider && provider._address) {
-    provider._time = Date.now()
-    Sea.localStorage('provider', provider)
-    return provider
-  }
-  return null
+  const host = process.env.UNIPASS_URL
+  const successUrl = window.location.origin
+  const failUrl = window.location.origin
+  const url = `${host}?success_url=${successUrl}&fail_url=${failUrl}/#login`
+  saveState(ActionType.Init)
+  window.location.href = url
 }
 
 Sea.getActivity = async () => {
@@ -70,7 +75,6 @@ Sea.getActivity = async () => {
     url: '/ticket/activity',
     method: 'get',
   })
-  console.log('[getActivity]', res)
   return res
 }
 
@@ -126,13 +130,13 @@ Sea.getAssetsAndAuthNFT = async (
   sig,
   messageHash,
 ) => {
-  console.log('[getAssets]', messageHash, sig)
+  console.log('[getAssets]', messageHash, sig.length)
   try {
     const pass = verifier(messageHash, sig)
     console.log('[getAssets]-verifierSign:', pass)
     if (!pass) return { pass }
   } catch (e) {
-    console.log(e)
+    console.log('[getAssets-e]', e)
   }
 
   const res = await Sea.Ajax({
@@ -155,9 +159,35 @@ Sea.getAssetsAndAuthNFT = async (
 
 Sea.createSignMessage = async (address) => {
   console.log('createSignMessage', address)
-  const data = await encodeMessage()
-  console.log('[createSignMessage]', data)
-  return data
+  // todo
+  const pubkey = getPubkey()
+  if (!pubkey) return
+  const host = process.env.UNIPASS_URL
+  const successUrl = window.location.origin + '/ticket'
+  const failUrl = window.location.origin + '/ticket'
+
+  const { messageHash, timestamp } = await encodeMessage()
+  console.log('[createSignMessage]', messageHash, timestamp)
+  saveState(ActionType.SignMsg, JSON.stringify({ messageHash, timestamp }))
+  const _url = `${host}?success_url=${successUrl}&fail_url=${failUrl}&pubkey=${pubkey}&message=${messageHash}/#sign`
+  window.location.href = _url
+}
+
+Sea.getSignData = () => {
+  const pageState = restoreState()
+  const extraObj = pageState.extraObj
+  console.log('[[[[pageState]]]]', pageState)
+  if (!pageState.data.signature) return null
+  if (extraObj) {
+    const { messageHash, timestamp } = JSON.parse(extraObj)
+    const data = {
+      messageHash,
+      timestamp,
+      sig: pageState.data.signature,
+    }
+    return data
+  }
+  return null
 }
 
 Sea.formatDate = (card) => {
@@ -185,4 +215,11 @@ Sea.getClassArgs = () => {
 
 Sea.saveClassArgs = (classArgs) => {
   Sea.localStorage('classArgs', classArgs)
+}
+
+Sea.saveData = (key, data) => {
+  Sea.localStorage(key, data)
+}
+Sea.getData = (key) => {
+  return Sea.localStorage(key)
 }

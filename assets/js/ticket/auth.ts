@@ -1,6 +1,5 @@
 import { createHash } from 'crypto'
 import { Address, AddressType } from '@lay2/pw-core'
-import UnipassProvider from '../unipass/UnipassProvider'
 import { getAddressByPubkey, getDataFromSignString } from '../utils/utils'
 
 interface NFT {
@@ -20,7 +19,7 @@ export interface PushData {
   sig?: string
 }
 
-export async function encodeMessage() {
+export function encodeMessage() {
   const message = {
     timestamp: Date.now(),
   }
@@ -28,12 +27,8 @@ export async function encodeMessage() {
     .update(JSON.stringify(message))
     .digest('hex')
     .toString()
-  console.log('[encodeMessage]', message)
-  const sig = await new UnipassProvider(process.env.UNIPASS_URL).sign(
-    messageHash,
-  )
-  console.log('[encodeMessage]', sig)
-  return { sig, timestamp: message.timestamp, messageHash }
+  // return { sig, timestamp: message.timestamp, messageHash }
+  return { messageHash, timestamp: message.timestamp }
 }
 
 export function authHaveTargetNFT(

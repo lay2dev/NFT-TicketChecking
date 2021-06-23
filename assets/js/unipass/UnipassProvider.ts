@@ -219,7 +219,7 @@ function closeFrame(frame: HTMLIFrameElement) {
   document.body.style.removeProperty('overflow')
 }
 
-function pubkeyToAddress(pubkey: string): string {
+export function pubkeyToAddress(pubkey: string): string {
   getAddressByPubkey(pubkey)
   const pubKeyBuffer = Buffer.from(pubkey.replace('0x', ''), 'hex')
   const hashHex = new Blake2bHasher()

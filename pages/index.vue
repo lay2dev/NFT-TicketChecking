@@ -38,16 +38,12 @@ export default {
   },
   created() {
     const { address, email, phone } = this.$route.query
-    if (address) {
-      Sea.SaveDataByUrl(address, email || phone)
-    }
-  },
-  mounted() {
+    Sea.SaveDataByUrl(address, email || phone)
     this.init()
   },
   methods: {
     bindCard(card) {
-      this.$store.state.card = card
+      Sea.saveData('card', card)
       this.$router.push('/ticket')
     },
     formatDate: Sea.formatDate,
@@ -57,8 +53,6 @@ export default {
       if (provider) {
         this.$store.state.provider = provider
         await this.initList()
-      } else {
-        this.init()
       }
       this.loading = false
     },

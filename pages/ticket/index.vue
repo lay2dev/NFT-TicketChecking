@@ -52,11 +52,16 @@ export default {
     }
   },
   created() {
-    const card = this.$store.state.card
-    const provider = this.$store.state.provider
+    const card = Sea.getData('card')
+    const provider = Sea.getData('provider')
+
     if (card && provider) {
       this.card = card
       this.provider = provider
+      const data = Sea.SaveDataByUrl()
+      if (data) {
+        this.postData(data)
+      }
     } else {
       this.$router.replace('/')
     }
@@ -73,9 +78,12 @@ export default {
       return res.key
     },
     dayjs,
-    async bindCheck() {
+    bindCheck() {
+      Sea.createSignMessage()
+    },
+    async postData(data) {
+      console.log('--data', data)
       this.loading = true
-      const data = await Sea.createSignMessage()
       const address = this.provider._address.addressString
       Object.assign(data, { address })
       if (data.sig.includes('N/A')) {
