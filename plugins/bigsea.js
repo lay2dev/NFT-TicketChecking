@@ -53,8 +53,8 @@ Sea.login = async () => {
     return provider
   }
   const host = process.env.UNIPASS_URL
-  const successUrl = window.location.origin
-  const failUrl = window.location.origin
+  const successUrl = new URL(window.location.href).href
+  const failUrl = new URL(window.location.href).href
   const url = `${host}?success_url=${successUrl}&fail_url=${failUrl}/#login`
   saveState(ActionType.Init)
   window.location.href = url
@@ -154,8 +154,8 @@ Sea.createSignMessage = async (address) => {
   const pubkey = getPubkey()
   if (!pubkey) return
   const host = process.env.UNIPASS_URL
-  const successUrl = window.location.origin + '/ticket'
-  const failUrl = window.location.origin + '/ticket'
+  const successUrl = new URL(window.location.href).href
+  const failUrl = new URL(window.location.href).href
 
   const { messageHash, timestamp } = await encodeMessage()
   console.log('[createSignMessage]', messageHash, timestamp)
