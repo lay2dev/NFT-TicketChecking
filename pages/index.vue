@@ -37,8 +37,7 @@ export default {
     }
   },
   created() {
-    const { address, email, phone } = this.$route.query
-    Sea.SaveDataByUrl(address, email || phone)
+    Sea.SaveDataByUrl()
     this.init()
   },
   methods: {

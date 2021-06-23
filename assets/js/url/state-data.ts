@@ -65,20 +65,21 @@ export function getPubkey(): string | undefined {
   return provider._pubkey
 }
 
-export function getDataFromUrl(action: number): void {
+export function getDataFromUrl(action: number) {
   const url = new URL(window.location.href)
+  let info = ''
   let data = ''
   try {
     data = url.searchParams.get('unipass_ret') as string
   } catch (e) {
-    return
+    return info
   }
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const unipassStr = urlencode.decode(data, 'utf-8')
   console.log('unipassStr', unipassStr)
   const unipassData = JSON.parse(unipassStr) as UnipassURLData
 
-  if (!unipassData) return
+  if (!unipassData) return info
   console.log(unipassData)
   if (unipassData.code === 200) {
     if (unipassData.data.pubkey) {
@@ -109,8 +110,11 @@ export function getDataFromUrl(action: number): void {
       }
       saveData(PROVIDER, JSON.stringify(provider))
     }
+  } else {
+    info = unipassData.info
   }
   url.searchParams.delete('unipass_ret')
   history.replaceState('', '', url.href)
   console.log('url.href', url.href)
+  return info
 }

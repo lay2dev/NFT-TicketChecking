@@ -60,7 +60,11 @@ export default {
       this.provider = provider
       const data = Sea.SaveDataByUrl()
       if (data) {
-        this.postData(data)
+        if (data.info) {
+          this.$message.warning(data.info)
+        } else {
+          this.postData(data)
+        }
       }
     } else {
       this.$router.replace('/')
@@ -86,14 +90,6 @@ export default {
       this.loading = true
       const address = this.provider._address.addressString
       Object.assign(data, { address })
-      if (data.sig.includes('N/A')) {
-        this.$message({
-          type: 'warn',
-          message: 'sign rejected',
-        })
-        this.loading = false
-        return
-      }
       const key = await this.getShortUrlKeyByInfo(data)
 
       const url = `${window.location.origin}/check?key=${key}`

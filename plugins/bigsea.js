@@ -1,6 +1,6 @@
 import '~/assets/js/utils/bigsea'
 import dayjs from 'dayjs'
-import PWCore, { ChainID, Address } from '@lay2/pw-core'
+import PWCore, { ChainID } from '@lay2/pw-core'
 import { ActionType } from 'assets/js/url/interface'
 import {
   restoreState,
@@ -8,7 +8,6 @@ import {
   getPubkey,
   saveState,
 } from 'assets/js/url/state-data'
-import UnipassProvider from '~/assets/js/unipass/UnipassProvider.ts'
 import {
   authHaveTargetNFT,
   encodeMessage,
@@ -20,24 +19,16 @@ Sea.Ajax.HOST = process.env.NFT_GIFT_API_URL
 PWCore.chainId =
   process.env.CKB_CHAIN_ID === '0' ? ChainID.ckb : ChainID.ckb_testnet
 
-Sea.SaveDataByUrl = (address, email) => {
-  if (address) {
-    const provider = new UnipassProvider()
-    provider._time = Date.now()
-    provider._address = new Address(address)
-    provider._email = email || ''
-    Sea.localStorage('provider', provider)
-  } else {
-    const pageState = restoreState(true)
-    console.log(pageState)
-    let action = ActionType.Init
-    if (pageState) action = pageState.action
-    if (action === ActionType.Init) {
-      getDataFromUrl(ActionType.Login)
-    } else if (action === ActionType.SignMsg) {
-      getDataFromUrl(ActionType.SignMsg)
-      return Sea.getSignData()
-    }
+Sea.SaveDataByUrl = () => {
+  const pageState = restoreState(true)
+  let action = ActionType.Init
+  if (pageState) action = pageState.action
+  if (action === ActionType.Init) {
+    const info = getDataFromUrl(ActionType.Login)
+    return info
+  } else if (action === ActionType.SignMsg) {
+    const info = getDataFromUrl(ActionType.SignMsg)
+    return Sea.getSignData(info)
   }
 }
 
@@ -173,12 +164,11 @@ Sea.createSignMessage = async (address) => {
   window.location.href = _url
 }
 
-Sea.getSignData = () => {
+Sea.getSignData = (info) => {
   const pageState = restoreState()
   const extraObj = pageState.extraObj
   console.log('[[[[pageState]]]]', pageState)
-  if (!pageState.data.signature) return null
-  if (extraObj) {
+  if (extraObj && pageState.data.signature) {
     const { messageHash, timestamp } = JSON.parse(extraObj)
     const data = {
       messageHash,
@@ -187,7 +177,7 @@ Sea.getSignData = () => {
     }
     return data
   }
-  return null
+  return { info }
 }
 
 Sea.formatDate = (card) => {
