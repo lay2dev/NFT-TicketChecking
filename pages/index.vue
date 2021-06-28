@@ -42,8 +42,12 @@ export default {
   },
   methods: {
     bindCard(card) {
-      Sea.saveData('card', card)
-      this.$router.push('/ticket')
+      if (card.status === 2) {
+        this.$message.info('活动已结束')
+      } else {
+        Sea.saveData('card', card)
+        this.$router.push('/ticket')
+      }
     },
     formatDate: Sea.formatDate,
     async init() {
