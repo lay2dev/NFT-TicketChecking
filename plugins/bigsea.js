@@ -135,6 +135,8 @@ Sea.getAssetsAndAuthNFT = async (
     method: 'get',
     data: {
       address,
+      page: 0,
+      limit: 200,
     },
   })
   console.log('[getAssets]- nft len is', res.length)

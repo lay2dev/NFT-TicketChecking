@@ -32,7 +32,7 @@ export function encodeMessage() {
 }
 
 export function authHaveTargetNFT(
-  list: NFT[],
+  list: NFT[][],
   targetArgs: string,
   targetTokenID: number,
 ) {
@@ -42,7 +42,12 @@ export function authHaveTargetNFT(
   const targetClassID = targetTypeArgs.slice(40, 48)
   let ticketId = 0
   let pass = false
-  for (const item of list) {
+  const list2 = []
+  for (const items of list) {
+    list2.push(...items)
+  }
+
+  for (const item of list2) {
     console.log(item)
     const typeArgs = item.nftTypeArgs.slice(2)
     const issuerId = typeArgs.slice(0, 40)
