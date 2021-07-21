@@ -118,3 +118,14 @@ export function getDataFromUrl(action: number) {
   console.log('url.href', url.href)
   return info
 }
+export function generateUnipassUrl(
+  host: string,
+  action: string,
+  params: { [key: string]: string },
+) {
+  const urlObj = new URL(`${host}/${action.toLowerCase()}`)
+  for (const key of Object.keys(params)) {
+    urlObj.searchParams.set(key, params[key])
+  }
+  return urlObj.href
+}

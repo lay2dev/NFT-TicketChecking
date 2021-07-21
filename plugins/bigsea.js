@@ -7,6 +7,7 @@ import {
   getDataFromUrl,
   getPubkey,
   saveState,
+  generateUnipassUrl,
 } from 'assets/js/url/state-data'
 import {
   authHaveTargetNFT,
@@ -53,9 +54,9 @@ Sea.login = async () => {
     return provider
   }
   const host = process.env.UNIPASS_URL
-  const successUrl = encodeURIComponent(new URL(window.location.href).href)
-  const failUrl = encodeURIComponent(new URL(window.location.href).href)
-  const url = `${host}?success_url=${successUrl}&fail_url=${failUrl}/#login`
+  // eslint-disable-next-line camelcase
+  const success_url = new URL(window.location.href).href
+  const url = generateUnipassUrl(host, 'login', { success_url })
   saveState(ActionType.Init)
   window.location.href = url
 }
@@ -157,13 +158,16 @@ Sea.createSignMessage = async (address) => {
   if (!pubkey) return
   const host = process.env.UNIPASS_URL
 
-  const successUrl = encodeURIComponent(new URL(window.location.href).href)
-  const failUrl = encodeURIComponent(new URL(window.location.href).href)
-
   const { messageHash, timestamp } = await encodeMessage()
   console.log('[createSignMessage]', messageHash, timestamp)
   saveState(ActionType.SignMsg, JSON.stringify({ messageHash, timestamp }))
-  const _url = `${host}?success_url=${successUrl}&fail_url=${failUrl}&pubkey=${pubkey}&message=${messageHash}/#sign`
+  // eslint-disable-next-line camelcase
+  const success_url = new URL(window.location.href).href
+  const _url = generateUnipassUrl(host, 'sign', {
+    success_url,
+    pubkey,
+    message: messageHash,
+  })
   window.location.href = _url
 }
 
