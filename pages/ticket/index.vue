@@ -26,8 +26,8 @@
           </template>
           <template v-else>
             <div class="status">待验票</div>
-            <div class="tip">您需要持有图中指定 NFT，才能通过验证。</div>
-            <el-button round type="primary" :loading="loading" @click="bindCheck">发起验票</el-button>
+            <div class="tip">{{tips}}</div>
+            <el-button round type="primary" :loading="loading" @click="bindCheck">{{label}}</el-button>
           </template>
         </div>
       </div>
@@ -49,6 +49,8 @@ export default {
       provider: {},
       status: '',
       QRCode: '',
+      tips: '您需要持有图中指定 NFT，才能通过验证。',
+      label: '发起验票',
     }
   },
   created() {
@@ -80,7 +82,8 @@ export default {
       }
       const res = await Sea.getShortUrlKeyInfo(req)
       console.log('[getShortUrlKeyInfo]', res.key)
-      return res.key
+      if (!res[0]) return res[1]
+      return res[1]
     },
     dayjs,
     bindCheck() {
@@ -97,17 +100,36 @@ export default {
         data.messageHash,
       )
       console.log('auth', { pass, ticketId })
-      if (!pass) return // todo
+      if (!pass) {
+        this.loading = false
+        this.tips = '当前地址上没有指定验证的NFT 无法获得NFT'
+        this.label = '无效二维码'
+        return
+      }
 
       const tokenId = ticketId
       const activity = this.card.id
 
       Object.assign(data, { address, tokenId, activity })
 
-      const key = await this.getShortUrlKeyByInfo(data)
+      const res = await this.getShortUrlKeyByInfo(data)
+      console.log(res)
+      if (!res) {
+        this.loading = false
+        this.tips = '当前地址上没有指定验证的NFT 无法获得NFT'
+        this.label = '无效二维码'
+        return
+      }
+      if (!res.key) {
+        this.loading = false
+        this.tips = '当前门票二维码已被使用 无法生成二维码'
+        this.label = '二维码已验证'
+        return
+      }
+      const key = res.key
       console.log('key', key)
 
-      const url = `${window.location.origin}/check?key=${key}`
+      const url = `${window.location.origin}/check?key=${key}&id=${this.card.id}`
       console.log(url)
       this.QRCode = await QRCode.toDataURL(url, {
         type: 'image/png',

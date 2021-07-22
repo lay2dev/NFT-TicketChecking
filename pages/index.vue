@@ -29,8 +29,8 @@ export default {
     return {
       loading: true,
       statusDict: {
-        0: '进行中',
-        1: '未开始',
+        0: '未开始',
+        1: '进行中',
         2: '已结束',
       },
       cards: [],
@@ -62,6 +62,7 @@ export default {
     async initList() {
       const cards = await Sea.getActivity()
       this.cards = cards || []
+      console.log(cards)
     },
   },
 }

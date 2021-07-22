@@ -71,21 +71,20 @@ export function getDataFromUrl(action: number) {
   let data = ''
   try {
     data = url.searchParams.get('unipass_ret') as string
+    console.log(data)
   } catch (e) {
+    console.log(e)
     return info
   }
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const unipassStr = urlencode.decode(data, 'utf-8')
-  console.log('unipassStr', unipassStr)
   const unipassData = JSON.parse(unipassStr) as UnipassURLData
 
   if (!unipassData) return info
-  console.log(unipassData)
   if (unipassData.code === 200) {
     if (unipassData.data.pubkey) {
       const ckbAddress = pubkeyToAddress(unipassData.data.pubkey)
       let pageState = JSON.parse(getData(PAGESTATE)) as PageState
-      console.log('---pageState')
       if (pageState) {
         pageState.data.signature = unipassData.data.sig as string
         pageState.data.pubkey = unipassData.data.pubkey as string

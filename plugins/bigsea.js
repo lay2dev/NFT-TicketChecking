@@ -25,11 +25,14 @@ Sea.SaveDataByUrl = () => {
   let action = ActionType.Init
   if (pageState) action = pageState.action
   if (action === ActionType.Init) {
-    const info = getDataFromUrl(ActionType.Login)
-    return info
+    getDataFromUrl(ActionType.Login)
+    return true
   } else if (action === ActionType.SignMsg) {
     const info = getDataFromUrl(ActionType.SignMsg)
     return Sea.getSignData(info)
+  } else {
+    getDataFromUrl(ActionType.Login)
+    return true
   }
 }
 
@@ -48,9 +51,9 @@ Sea.checkLogin = () => {
   return null
 }
 
-Sea.login = async () => {
+Sea.login = async (change) => {
   const provider = await Sea.checkLogin()
-  if (provider) {
+  if (provider && !change) {
     return provider
   }
   const host = process.env.UNIPASS_URL
@@ -59,6 +62,33 @@ Sea.login = async () => {
   const url = generateUnipassUrl(host, 'login', { success_url })
   saveState(ActionType.Init)
   window.location.href = url
+}
+
+Sea.getToken = async (address, key) => {
+  const res = await Sea.Ajax({
+    url: '/ticket/token',
+    data: {
+      address,
+      key,
+    },
+    method: 'get',
+  })
+  if (res.code !== 200) return false
+  return res
+}
+
+Sea.pushVerifyData = async (pass, key, token) => {
+  const res = await Sea.Ajax({
+    url: '/ticket/vierfiy',
+    data: {
+      pass,
+      key,
+      token,
+    },
+    method: 'patch',
+  })
+  if (res.code !== 200) return false
+  return res
 }
 
 Sea.getActivity = async () => {
@@ -80,32 +110,33 @@ Sea.askVerifiy = async (address, activity) => {
       activity,
     },
   })
-  console.log('[askVerifiy]', res)
+  if (res.code !== 200) return false
   return res
 }
 
 Sea.getShortUrlKeyInfo = async (data) => {
-  console.log('[getShortUrlKeyInfo]', data)
   const res = await Sea.Ajax({
     url: '/ticket/vierfiy',
     method: 'post',
     data,
   })
-  console.log('[getShortUrlKeyInfo]', res)
-  return res
+  console.log(res)
+
+  if (res.code === 410) return [true, true]
+  if (res.code !== 200) return [false, false]
+  return [true, res]
 }
 
-Sea.getShortKeyInfoData = async ({ key }) => {
-  const data = {
-    key,
-  }
-  console.log('[getShortKeyInfoData]', data)
+Sea.getShortKeyInfoData = async ({ key, token }) => {
   const res = await Sea.Ajax({
     url: '/ticket/vierfiy',
     method: 'get',
-    data,
+    data: {
+      key,
+      token,
+    },
   })
-  console.log('[getShortKeyInfoData]', res)
+  if (res.code !== 200) return false
   return res
 }
 

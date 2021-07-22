@@ -1,7 +1,7 @@
 <template>
   <div id="page-ticket">
     <div class="page-title">NFT验票</div>
-    <right @clear="open" />
+    <!-- <right @clear="init" /> -->
     <div class="card-box">
       <div class="card">
         <div class="check" :class="status">
@@ -16,8 +16,8 @@
             <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div>
           </template>
           <template v-else>
-            <div class="status">待验票中</div>
-            <el-button round type="primary" :loading="loading">验票中。。</el-button>
+            <div class="status">{{tips}}</div>
+            <el-button round type="primary" :loading="loading" @click="login">{{label}}</el-button>
           </template>
         </div>
       </div>
@@ -30,14 +30,16 @@ import right from '~/components/right.vue'
 export default {
   components: { right },
   data() {
-    const { key } = this.$route.query
-    console.log(this.$route.query, key)
+    const { key, id } = this.$route.query
+    Sea.localStorage('key', key)
     return {
       loading: false,
       card: {
         nft: {},
       },
       key,
+      id,
+      token: '',
       provider: {},
       status: '',
       targetArgs: '',
@@ -45,28 +47,86 @@ export default {
       authData: null,
       result: null,
       ticketId: '',
+      tips: '待验票中',
+      label: '验票中。。',
     }
   },
-  created() {
-    const targetArgs = Sea.localStorage('classArgs')
-    if (targetArgs) {
-      this.targetArgs = targetArgs
-      this.bindCheck()
-    } else if (!targetArgs) {
-      this.open()
+  async created() {
+    const data = await Sea.SaveDataByUrl()
+    if (data) {
+      await this.getToken()
+    }
+    const { key, id } = this.$route.query
+    this.key = key
+    this.id = id
+    const provider = Sea.getData('provider')
+    console.log(provider)
+    if (provider) {
+      this.provider = provider
+      const token = Sea.localStorage('token')
+      if (!token) {
+        this.getToken()
+      } else {
+        this.token = token.token
+        this.targetArgs = token.nftTypeArgs
+        this.bindCheck()
+      }
+    } else {
+      console.log(provider)
+      this.init()
     }
   },
   methods: {
     dayjs,
     // get data
     async getShortKeyInfoData() {
-      console.log('[getShortUrlKeyInfo]', this.key)
+      console.log('[getShortKeyInfoData]', this.key)
+
       const authData = await Sea.getShortKeyInfoData({
         key: this.key,
+        token: this.token,
       })
       // auth datat
+      if (!authData) return
       this.authData = authData
-      console.log('[getShortUrlKeyInfo]', authData)
+    },
+
+    async init() {
+      console.log('this.token')
+      this.loading = true
+      const provider = await Sea.login()
+      console.log(provider)
+      if (provider) {
+        this.$store.state.provider = provider
+        this.provider = provider
+      }
+      this.loading = false
+    },
+
+    async login() {
+      if (this.token) return
+      this.loading = true
+      Sea.localStorage('token', null)
+      await Sea.login(true)
+      this.loading = false
+    },
+    async getToken() {
+      this.loading = true
+      const provider = Sea.getData('provider')
+      const address = provider._address.addressString
+      const token = await Sea.getToken(address, this.id)
+      if (!token) {
+        this.tips = '当前地址无验票权限'
+        this.label = '切换账号'
+        this.token = false
+        this.loading = false
+        return
+      }
+      Sea.localStorage('token', token)
+      this.token = token.token
+      console.log(token)
+      this.targetArgs = token.nftTypeArgs
+      this.bindCheck()
     },
 
     // start verifiy
@@ -90,32 +150,12 @@ export default {
       // todo get auth data from key
       await this.getShortKeyInfoData()
       const { pass, ticketId } = await this.startVerifiyQRData()
-      console.log('[bindCheck]', pass, ticketId)
       pass ? (this.status = 'success') : (this.status = 'fail')
       this.loading = false
-      console.log('[bindCheck]', this.status)
       this.ticketId = ticketId
+      const data = await Sea.pushVerifyData(pass, this.key, this.token)
     },
     formatDate: Sea.formatDate,
-
-    open() {
-      this.$prompt('请输入要验证的NFT信息', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputValue: this.targetArgs,
-        closeOnClickModal: false,
-      })
-        .then(({ value }) => {
-          this.targetArgs = value
-          Sea.localStorage('classArgs', this.targetArgs)
-          this.$message({
-            type: 'success',
-            message: '输入要验证的NFT信息是: ' + value,
-          })
-          this.bindCheck()
-        })
-        .catch(() => {})
-    },
   },
 }
 </script>
