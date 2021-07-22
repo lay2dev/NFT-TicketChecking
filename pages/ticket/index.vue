@@ -54,7 +54,6 @@ export default {
   created() {
     const card = Sea.getData('card')
     const provider = Sea.getData('provider')
-
     if (card && provider) {
       this.card = card
       this.provider = provider
@@ -72,12 +71,14 @@ export default {
   },
   methods: {
     async getShortUrlKeyByInfo(data) {
-      console.log('[getShortUrlKeyInfo]', data)
-      const res = await Sea.getShortUrlKeyInfo({
+      const req = {
         address: data.address,
         sig: data.sig,
         messageHash: data.messageHash,
-      })
+        tokenId: data.tokenId,
+        activity: data.activity,
+      }
+      const res = await Sea.getShortUrlKeyInfo(req)
       console.log('[getShortUrlKeyInfo]', res.key)
       return res.key
     },
@@ -86,11 +87,25 @@ export default {
       Sea.createSignMessage()
     },
     async postData(data) {
-      console.log('--data', data)
       this.loading = true
       const address = this.provider._address.addressString
-      Object.assign(data, { address })
+      const { pass, ticketId } = await Sea.getAssetsAndAuthNFT(
+        address,
+        this.card.nftTypeArgs,
+        this.card.targetTokenID,
+        data.sig,
+        data.messageHash,
+      )
+      console.log('auth', { pass, ticketId })
+      if (!pass) return // todo
+
+      const tokenId = ticketId
+      const activity = this.card.id
+
+      Object.assign(data, { address, tokenId, activity })
+
       const key = await this.getShortUrlKeyByInfo(data)
+      console.log('key', key)
 
       const url = `${window.location.origin}/check?key=${key}`
       console.log(url)

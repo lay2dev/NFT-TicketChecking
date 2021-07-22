@@ -36,7 +36,6 @@ export function authHaveTargetNFT(
   targetArgs: string,
   targetTokenID: number,
 ) {
-  console.log('[targetArgs]', targetArgs)
   const targetTypeArgs = targetArgs.slice(2)
   const targetIssuerID = targetTypeArgs.slice(0, 40)
   const targetClassID = targetTypeArgs.slice(40, 48)
@@ -48,7 +47,6 @@ export function authHaveTargetNFT(
   }
 
   for (const item of list2) {
-    console.log(item)
     const typeArgs = item.nftTypeArgs.slice(2)
     const issuerId = typeArgs.slice(0, 40)
     const classId = typeArgs.slice(40, 48)

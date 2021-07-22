@@ -99,7 +99,6 @@ export function getDataFromUrl(action: number) {
           },
         }
       }
-      console.log('[==pageState]', pageState)
       saveData(PAGESTATE, JSON.stringify(pageState))
 
       const provider = {

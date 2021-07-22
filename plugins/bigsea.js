@@ -84,13 +84,7 @@ Sea.askVerifiy = async (address, activity) => {
   return res
 }
 
-Sea.getShortUrlKeyInfo = async ({ address, sig, messageHash }) => {
-  const data = {
-    address,
-    sig,
-    messageHash,
-    activity: 0,
-  }
+Sea.getShortUrlKeyInfo = async (data) => {
   console.log('[getShortUrlKeyInfo]', data)
   const res = await Sea.Ajax({
     url: '/ticket/vierfiy',
@@ -122,10 +116,8 @@ Sea.getAssetsAndAuthNFT = async (
   sig,
   messageHash,
 ) => {
-  console.log('[getAssets]', messageHash, sig.length)
   try {
     const pass = verifier(messageHash, sig)
-    console.log('[getAssets]-verifierSign:', pass)
     if (!pass) return { pass }
   } catch (e) {
     console.log('[getAssets-e]', e)
@@ -140,9 +132,7 @@ Sea.getAssetsAndAuthNFT = async (
       limit: 200,
     },
   })
-  console.log('[getAssets]- nft len is', res.length)
   const data = await authHaveTargetNFT(res, targetArgs, targetTokenID)
-  console.log('[getAssets]- have  target nft', data)
   if (!data.pass) return data
 
   const pass = authAdrress(sig, address)
@@ -151,9 +141,7 @@ Sea.getAssetsAndAuthNFT = async (
   return data
 }
 
-Sea.createSignMessage = async (address) => {
-  console.log('createSignMessage', address)
-  // todo
+Sea.createSignMessage = async () => {
   const pubkey = getPubkey()
   if (!pubkey) return
   const host = process.env.UNIPASS_URL
@@ -174,7 +162,6 @@ Sea.createSignMessage = async (address) => {
 Sea.getSignData = (info) => {
   const pageState = restoreState()
   const extraObj = pageState.extraObj
-  console.log('[[[[pageState]]]]', pageState)
   if (extraObj && pageState.data.signature) {
     const { messageHash, timestamp } = JSON.parse(extraObj)
     const data = {
