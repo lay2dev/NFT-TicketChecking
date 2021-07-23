@@ -60,7 +60,6 @@ export default {
       this.card = card
       this.provider = provider
       const data = await Sea.SaveDataByUrl()
-      console.log(data)
       if (data) {
         if (data.info) {
           this.$message.warning(data.info)
@@ -111,13 +110,16 @@ export default {
         this.loading = false
         this.tips = '当前地址上没有指定验证的NFT 无法获得NFT'
         this.label = '无效二维码'
+        return
       }
-      if (!res.key || key == undefined) {
+      const key = res.key
+
+      if (!key || key == 'undefined') {
         this.loading = false
         this.tips = '当前门票二维码已被使用 无法生成二维码'
         this.label = '二维码已验证'
+        return
       }
-      const key = res.key
       const url = `${window.location.origin}/check?key=${key}&id=${this.card.id}`
       console.log(url)
       this.QRCode = await QRCode.toDataURL(url, {

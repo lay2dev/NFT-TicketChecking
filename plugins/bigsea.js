@@ -28,7 +28,6 @@ Sea.SaveDataByUrl = async () => {
   const pageState = restoreState(true)
   let action = ActionType.Init
   if (pageState) action = pageState.action
-  console.log(pageState, pageState)
   if (action === ActionType.Init) {
     getDataFromUrl(ActionType.Login)
   } else if (action === ActionType.SignMsg) {
@@ -142,8 +141,9 @@ Sea.getShortKeyInfoData = async ({ key, token }) => {
       token,
     },
   })
-  if (res.code !== 200) return false
-  return res
+  if (res.code !== 200) return [false, false]
+  if (res.code !== 403) return [false, true]
+  return [true, res]
 }
 
 Sea.getAssetsAndAuthNFT = async (
@@ -257,8 +257,9 @@ Sea.getTicketSignData = async (address, targetArgs, targetTokenID) => {
     },
   })
   const data = await authHaveTargetNFT(res, targetArgs, targetTokenID)
-  if (!data.pass) return data.pass
-  return getTicketSignMessage(data.nfts, data.ticketId)
+  if (!data.pass) return false
+  await getTicketSignMessage(data.nfts, data.ticketId)
+  return true
 }
 
 Sea.getTxSignData = (info) => {

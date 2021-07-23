@@ -87,8 +87,14 @@ export default {
         token: this.token,
       })
       // auth datat
-      if (!authData) return
-      this.authData = authData
+      if (!authData[0]) {
+        this.tips = '当前地址无验票权限'
+        this.label = '切换账号'
+        this.token = false
+        this.loading = false
+      } else {
+        this.authData = authData[1]
+      }
     },
 
     async init() {
@@ -115,6 +121,7 @@ export default {
       const provider = Sea.getData('provider')
       const address = provider._address.addressString
       const token = await Sea.getToken(address, this.id)
+      console.log(token)
       if (!token) {
         this.tips = '当前地址无验票权限'
         this.label = '切换账号'
@@ -131,8 +138,11 @@ export default {
 
     // start verifiy
     async startVerifiyQRData() {
+      if (!this.targetArgs || !this.authData) {
+        this.loading = false
+        return
+      }
       console.log('[startVerifiyQRData]', this.authData.address)
-      if (!this.targetArgs) return
       const data = await Sea.getAssetsAndAuthNFT(
         this.authData.address,
         this.targetArgs,

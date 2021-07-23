@@ -29,4 +29,4 @@ yarn build
 node bin/publish-cdn.js
 
 # 备注：上传公钥命令
-#  ssh-copy-id -i ~/.ssh/id_rsa.pub user@domain.com
+# ssh-copy-id -i /Users/aven/.ssh/id_rsa.pub Aven@192.168.0.101
