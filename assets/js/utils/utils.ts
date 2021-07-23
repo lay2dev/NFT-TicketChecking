@@ -243,3 +243,27 @@ function getAddressByPubkeyHash(pubkeyHash: string): Address {
   const address = lock.toAddress()
   return address
 }
+
+export function addBinary(a: string, b: string) {
+  let res = ''
+  let c = 0
+  const binary1 = a.split('')
+  const binary2 = b.split('')
+  while (binary1.length || binary2.length) {
+    const a = binary1.pop()
+    const b = binary2.pop()
+    if (a && b) {
+      c += parseInt(a) + parseInt(b)
+    } else if (a) {
+      c += parseInt(a)
+    } else if (b) {
+      c += parseInt(b)
+    }
+    res = `${c % 2}${res}`
+    c > 1 ? (c = 1) : (c = 0)
+  }
+  if (c === 1) res = `${c}${res}`
+  let data = parseInt(res, 2).toString(16)
+  if (data.length === 1) data = `0${data}`
+  return data
+}

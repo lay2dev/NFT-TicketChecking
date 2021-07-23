@@ -53,13 +53,14 @@ export default {
       label: '发起验票',
     }
   },
-  created() {
+  async created() {
     const card = Sea.getData('card')
     const provider = Sea.getData('provider')
     if (card && provider) {
       this.card = card
       this.provider = provider
-      const data = Sea.SaveDataByUrl()
+      const data = await Sea.SaveDataByUrl()
+      console.log(data)
       if (data) {
         if (data.info) {
           this.$message.warning(data.info)
@@ -75,60 +76,48 @@ export default {
     async getShortUrlKeyByInfo(data) {
       const req = {
         address: data.address,
-        sig: data.sig,
-        messageHash: data.messageHash,
+        sig: data.sign,
+        messageHash: data.messages,
         tokenId: data.tokenId,
         activity: data.activity,
+        txBody: data.txBody,
       }
       const res = await Sea.getShortUrlKeyInfo(req)
-      console.log('[getShortUrlKeyInfo]', res.key)
       if (!res[0]) return res[1]
       return res[1]
     },
     dayjs,
-    bindCheck() {
-      Sea.createSignMessage()
+    async bindCheck() {
+      this.loading = true
+      const address = this.provider._address.addressString
+      const data = await Sea.getTicketSignData(
+        address,
+        this.card.nftTypeArgs,
+        this.card.tokenId,
+      )
+      if (!data) {
+        this.loading = false
+        this.tips = '当前地址上没有指定验证的NFT 无法获得NFT'
+        this.label = '无效二维码'
+      }
     },
     async postData(data) {
       this.loading = true
       const address = this.provider._address.addressString
-      const { pass, ticketId } = await Sea.getAssetsAndAuthNFT(
-        address,
-        this.card.nftTypeArgs,
-        this.card.targetTokenID,
-        data.sig,
-        data.messageHash,
-      )
-      console.log('auth', { pass, ticketId })
-      if (!pass) {
-        this.loading = false
-        this.tips = '当前地址上没有指定验证的NFT 无法获得NFT'
-        this.label = '无效二维码'
-        return
-      }
-
-      const tokenId = ticketId
       const activity = this.card.id
-
-      Object.assign(data, { address, tokenId, activity })
-
+      Object.assign(data, { address, activity })
       const res = await this.getShortUrlKeyByInfo(data)
-      console.log(res)
       if (!res) {
         this.loading = false
         this.tips = '当前地址上没有指定验证的NFT 无法获得NFT'
         this.label = '无效二维码'
-        return
       }
-      if (!res.key) {
+      if (!res.key || key == undefined) {
         this.loading = false
         this.tips = '当前门票二维码已被使用 无法生成二维码'
         this.label = '二维码已验证'
-        return
       }
       const key = res.key
-      console.log('key', key)
-
       const url = `${window.location.origin}/check?key=${key}&id=${this.card.id}`
       console.log(url)
       this.QRCode = await QRCode.toDataURL(url, {

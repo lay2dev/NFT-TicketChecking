@@ -42,6 +42,7 @@ export function authHaveTargetNFT(
   let ticketId = 0
   let pass = false
   const list2 = []
+  const nfts = []
   for (const items of list) {
     list2.push(...items)
   }
@@ -61,19 +62,17 @@ export function authHaveTargetNFT(
     }
     pass = true
     ticketId = tokenId
+    nfts.push(item)
     break
   }
-  return { pass, ticketId }
+  return { pass, ticketId, nfts }
 }
 
 export function authAdrress(signStr: string, address: string): boolean {
-  console.log('[authAdrress]')
   const { masterkey } = getDataFromSignString(signStr)
   const pushAddress = new Address(address, AddressType.ckb)
   const pubkeyAddressStr = getAddressByPubkey(masterkey)
   const pubkeyAddress = new Address(pubkeyAddressStr, AddressType.ckb)
-  console.log('[authAdrress]-pubkeyAddress.lockArgs', pubkeyAddress.lockArgs)
-  console.log('[authAdrress]-pushAddress.lockArgs', pushAddress.lockArgs)
   if (pubkeyAddress.lockArgs !== pushAddress.lockArgs) return false
   return true
 }

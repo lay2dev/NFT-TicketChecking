@@ -127,3 +127,22 @@ export function generateUnipassUrl(
   }
   return urlObj.href
 }
+
+export function splicingURL(
+  action: number,
+  data = '',
+  route: string,
+  pubkey: string,
+  message: string,
+) {
+  const host = process.env.UNIPASS_URL as string
+  const successUrl = new URL(window.location.href).href
+  const params = { success_url: successUrl, pubkey, message }
+  const url = generateUnipassUrl(host, route, params)
+  if (action === ActionType.SignMsg || action === ActionType.SendTx) {
+    if (!pubkey) return false
+    if (!message) return false
+  }
+  saveState(action, data)
+  window.location.href = url
+}

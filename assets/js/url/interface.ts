@@ -10,6 +10,15 @@ export interface UnipassURLData {
   info: string
   code: number
 }
+export interface NFT {
+  classTypeArgs: string
+  nftTypeArgs: string
+  tokenId: string
+  outPoint: {
+    txHash: string
+    index: string
+  }
+}
 
 export enum ActionType {
   Init,

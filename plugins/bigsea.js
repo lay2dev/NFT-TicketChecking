@@ -10,6 +10,10 @@ import {
   generateUnipassUrl,
 } from 'assets/js/url/state-data'
 import {
+  getTicketSignMessage,
+  getTicketSignCallback,
+} from 'assets/js/ticket/transfer'
+import {
   authHaveTargetNFT,
   encodeMessage,
   authAdrress,
@@ -20,19 +24,21 @@ Sea.Ajax.HOST = process.env.NFT_GIFT_API_URL
 PWCore.chainId =
   process.env.CKB_CHAIN_ID === '0' ? ChainID.ckb : ChainID.ckb_testnet
 
-Sea.SaveDataByUrl = () => {
+Sea.SaveDataByUrl = async () => {
   const pageState = restoreState(true)
   let action = ActionType.Init
   if (pageState) action = pageState.action
+  console.log(pageState, pageState)
   if (action === ActionType.Init) {
     getDataFromUrl(ActionType.Login)
-    return true
   } else if (action === ActionType.SignMsg) {
     const info = getDataFromUrl(ActionType.SignMsg)
     return Sea.getSignData(info)
+  } else if (action === ActionType.SendTx) {
+    const info = getDataFromUrl(ActionType.SignMsg)
+    return await Sea.getTxSignData(info)
   } else {
     getDataFromUrl(ActionType.Login)
-    return true
   }
 }
 
@@ -237,4 +243,37 @@ Sea.saveData = (key, data) => {
 }
 Sea.getData = (key) => {
   return Sea.localStorage(key)
+}
+
+Sea.getTicketSignData = async (address, targetArgs, targetTokenID) => {
+  console.log({ address, targetArgs, targetTokenID })
+  const res = await Sea.Ajax({
+    url: '/ckb',
+    method: 'get',
+    data: {
+      address,
+      page: 0,
+      limit: 200,
+    },
+  })
+  const data = await authHaveTargetNFT(res, targetArgs, targetTokenID)
+  if (!data.pass) return data.pass
+  return getTicketSignMessage(data.nfts, data.ticketId)
+}
+
+Sea.getTxSignData = (info) => {
+  const pageState = restoreState()
+  const extraObj = pageState.extraObj
+
+  if (extraObj && pageState.data.signature) {
+    const { tokenId, messages } = JSON.parse(extraObj)
+    const txBody = getTicketSignCallback(pageState.data.signature, extraObj)
+    return {
+      txBody: JSON.stringify(txBody),
+      sign: pageState.data.signature,
+      messages,
+      tokenId,
+    }
+  }
+  return { info }
 }
