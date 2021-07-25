@@ -42,12 +42,14 @@ export class TicketBuilder extends Builder {
     }
 
     // build tx
-    const rawOtx = new RawTransaction(inputCells, outputCells, this.cellDeps)
-    for (let i = 0; i < rawOtx.inputs.length - 1; i++) {
-      rawOtx.inputs[i].since = this.since
+    const rawTx = new RawTransaction(inputCells, outputCells, this.cellDeps)
+    for (let i = 0; i < rawTx.inputs.length - 1; i++) {
+      rawTx.inputs[i].since = this.since
     }
-    const otx = new Transaction(rawOtx, [this.witnessArgs])
 
-    return otx
+    const tx = new Transaction(rawTx, [this.witnessArgs])
+    console.log(tx)
+
+    return tx
   }
 }
