@@ -86,6 +86,7 @@ export default {
         key: this.key,
         token: this.token,
       })
+      console.log(authData)
       // auth datat
       if (!authData[0]) {
         this.tips = '当前地址无验票权限'

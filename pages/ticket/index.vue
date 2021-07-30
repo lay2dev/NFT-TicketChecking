@@ -60,6 +60,7 @@ export default {
       this.card = card
       this.provider = provider
       const data = await Sea.SaveDataByUrl()
+      console.log(data)
       if (data) {
         if (data.info) {
           this.$message.warning(data.info)
@@ -75,12 +76,12 @@ export default {
     async getShortUrlKeyByInfo(data) {
       const req = {
         address: data.address,
-        sig: data.sign,
-        messageHash: data.messages,
+        sig: data.sig,
+        messageHash: data.messageHash,
         tokenId: data.tokenId,
         activity: data.activity,
-        txBody: data.txBody,
       }
+      console.log(req)
       const res = await Sea.getShortUrlKeyInfo(req)
       if (!res[0]) return res[1]
       return res[1]
@@ -93,6 +94,7 @@ export default {
         address,
         this.card.nftTypeArgs,
         this.card.tokenId,
+        this.card.id,
       )
       if (!data) {
         this.loading = false
@@ -105,6 +107,7 @@ export default {
       const address = this.provider._address.addressString
       const activity = this.card.id
       Object.assign(data, { address, activity })
+      console.log('data', data)
       const res = await this.getShortUrlKeyByInfo(data)
       if (!res) {
         this.loading = false

@@ -9,15 +9,8 @@ import {
   saveState,
   generateUnipassUrl,
 } from 'assets/js/url/state-data'
-import {
-  getTicketSignMessage,
-  getTicketSignCallback,
-} from 'assets/js/ticket/transfer'
-import {
-  authHaveTargetNFT,
-  encodeMessage,
-  authAdrress,
-} from '~/assets/js/ticket/auth'
+import { getTicketSignCallback } from 'assets/js/ticket/transfer'
+import { authHaveTargetNFT, authAdrress } from '~/assets/js/ticket/auth'
 import { verifier } from '~/assets/js/ticket/verifier'
 
 Sea.Ajax.HOST = process.env.NFT_GIFT_API_URL
@@ -142,56 +135,20 @@ Sea.getShortKeyInfoData = async ({ key, token }) => {
     },
   })
   if (res.code !== 200) return [false, false]
+  if (res.code === 200) return [true, res]
   if (res.code !== 403) return [false, true]
-  return [true, res]
 }
 
-Sea.getAssetsAndAuthNFT = async (
-  address,
-  targetArgs,
-  targetTokenID,
-  sig,
-  messageHash,
-) => {
-  try {
-    const pass = verifier(messageHash, sig)
-    if (!pass) return { pass }
-  } catch (e) {
-    console.log('[getAssets-e]', e)
-  }
-
-  const res = await Sea.Ajax({
-    url: '/ckb',
-    method: 'get',
-    data: {
-      address,
-      page: 0,
-      limit: 200,
-    },
-  })
-  const data = await authHaveTargetNFT(res, targetArgs, targetTokenID)
-  if (!data.pass) return data
-
-  const pass = authAdrress(sig, address)
-  if (!pass) return data
-
-  return data
-}
-
-Sea.createSignMessage = async () => {
+Sea.createSignMessage = (message, tokenId) => {
   const pubkey = getPubkey()
   if (!pubkey) return
   const host = process.env.UNIPASS_URL
-
-  const { messageHash, timestamp } = await encodeMessage()
-  console.log('[createSignMessage]', messageHash, timestamp)
-  saveState(ActionType.SignMsg, JSON.stringify({ messageHash, timestamp }))
-  // eslint-disable-next-line camelcase
-  const success_url = new URL(window.location.href).href
+  saveState(ActionType.SignMsg, JSON.stringify({ message, tokenId }))
+  const successUrl = new URL(window.location.href).href
   const _url = generateUnipassUrl(host, 'sign', {
-    success_url,
+    success_url: successUrl,
     pubkey,
-    message: messageHash,
+    message,
   })
   window.location.href = _url
 }
@@ -200,12 +157,13 @@ Sea.getSignData = (info) => {
   const pageState = restoreState()
   const extraObj = pageState.extraObj
   if (extraObj && pageState.data.signature) {
-    const { messageHash, timestamp } = JSON.parse(extraObj)
+    const { message, tokenId } = JSON.parse(extraObj)
     const data = {
-      messageHash,
-      timestamp,
+      messageHash: message,
       sig: pageState.data.signature,
+      tokenId,
     }
+    console.log(data)
     return data
   }
   return { info }
@@ -245,20 +203,25 @@ Sea.getData = (key) => {
   return Sea.localStorage(key)
 }
 
-Sea.getTicketSignData = async (address, targetArgs, targetTokenID) => {
-  console.log({ address, targetArgs, targetTokenID })
+Sea.getTicketSignData = async (
+  address,
+  targetArgs,
+  targetTokenID,
+  activity,
+) => {
+  console.log({ address, targetArgs, targetTokenID, activity })
   const res = await Sea.Ajax({
     url: '/ckb',
     method: 'get',
     data: {
       address,
       page: 0,
-      limit: 200,
+      limit: 1000,
     },
   })
   const data = await authHaveTargetNFT(res, targetArgs, targetTokenID)
   if (!data.pass) return false
-  await getTicketSignMessage(data.nfts, data.ticketId)
+  await Sea.getSignMessage(activity, data.ticketId)
   return true
 }
 
@@ -277,4 +240,54 @@ Sea.getTxSignData = (info) => {
     }
   }
   return { info }
+}
+
+Sea.getSignMessage = async (activity, tokenId) => {
+  const data = {
+    activity,
+    tokenId,
+  }
+  console.log(data)
+  const res = await Sea.Ajax({
+    url: '/ticket/message',
+    method: 'post',
+    data,
+  })
+  if (res.messageHash) {
+    Sea.createSignMessage(res.messageHash, tokenId)
+  }
+
+  return true
+}
+
+Sea.getAssetsAndAuthNFT = async (
+  address,
+  targetArgs,
+  targetTokenID,
+  sig,
+  messageHash,
+) => {
+  try {
+    const pass = verifier(messageHash, sig)
+    if (!pass) return { pass }
+  } catch (e) {
+    console.log('[getAssets-e]', e)
+  }
+
+  const res = await Sea.Ajax({
+    url: '/ckb',
+    method: 'get',
+    data: {
+      address,
+      page: 0,
+      limit: 200,
+    },
+  })
+  const data = await authHaveTargetNFT(res, targetArgs, targetTokenID)
+  if (!data.pass) return data
+
+  const pass = authAdrress(sig, address)
+  if (!pass) return data
+
+  return data
 }
