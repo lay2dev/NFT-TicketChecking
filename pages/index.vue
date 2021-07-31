@@ -7,7 +7,7 @@
         v-for="(card, i) in cards"
         :key="i"
         class="card"
-        :class="`status${card.status}`"
+        :class="`status${card.showStatus}`"
         @click="bindCard(card)"
       >
         <div class="status">{{ statusDict[card.status] }}</div>
@@ -42,7 +42,7 @@ export default {
   },
   methods: {
     bindCard(card) {
-      if (card.status === 2) {
+      if (card.showStatus === 2) {
         this.$message.info('活动已结束')
       } else {
         Sea.saveData('card', card)
@@ -62,7 +62,6 @@ export default {
     async initList() {
       const cards = await Sea.getActivity()
       this.cards = cards || []
-      console.log(cards)
     },
   },
 }
