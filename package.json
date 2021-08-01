@@ -6,7 +6,7 @@
     "start": "nuxt",
     "build": "nuxt generate",
     "preview": "node preview.js",
-    "publish": "cross-env NODE_ENV=test sh bin/publish-cdn.sh",
+    "publish": "node bin/publish-cdn.js",
     "lint": "eslint --fix --ext \".js,.vue\" --ignore-path .gitignore .",
     "yarn": "yarn"
   },
@@ -19,7 +19,6 @@
     "@types/node-rsa": "^1.1.0",
     "ali-oss": "^6.15.2",
     "core-js": "^3.12.1",
-    "cross-env": "^7.0.3",
     "crypto": "^1.0.1",
     "dayjs": "^1.10.5",
     "element-ui": "^2.15.1",

@@ -1,14 +1,13 @@
-/* eslint-disable */
 // https://blog.csdn.net/zuggs_/article/details/84768489
 const fs = require('fs')
 const OSS = require('ali-oss')
-// const envparser = require('../config/envparser');
-// Object.assign(process.env, envparser());
+const dotenv = require('dotenv')
+dotenv.config()
 
 console.log('KEY', process.env.OSS_ACCESS_KEY_ID)
 console.log('SECRET', process.env.OSS_ACCESS_KEY_SECRET)
 console.log('BUCKET', process.env.OSS_BUCKET)
-console.log('BUCKET', process.env.OSS_PATH)
+console.log('PATH', process.env.OSS_PATH)
 
 const client = new OSS({
   // 地域节点
@@ -78,4 +77,3 @@ const main = async () => {
   uploaDirectory(process.cwd() + '/dist', process.env.OSS_PATH)
 }
 main()
-/* eslint-enable */
