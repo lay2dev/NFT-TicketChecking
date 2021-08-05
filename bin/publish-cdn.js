@@ -60,6 +60,7 @@ const deleteFile = async (name) => {
   }
 }
 // 删除目录
+// eslint-disable-next-line
 const deleteDirectory = async (prefix) => {
   const list = await client.list({
     prefix,
@@ -70,9 +71,10 @@ const deleteDirectory = async (prefix) => {
   console.log('删除完成', result)
 }
 
+// eslint-disable-next-line
 const main = async () => {
   // 删除
-  await deleteDirectory(process.env.OSS_PATH)
+  // await deleteDirectory(process.env.OSS_PATH)
   // 上传
   uploaDirectory(process.cwd() + '/dist', process.env.OSS_PATH)
 }
