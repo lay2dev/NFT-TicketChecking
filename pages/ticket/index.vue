@@ -3,19 +3,26 @@
     <back />
     <div class="page-title">{{ card.title }}</div>
     <div class="card-box">
-      <el-carousel class="cards" :height="`${height}px`" trigger="click">
-        <el-carousel-item v-for="item in 4" :key="item">
+      <el-carousel
+        class="cards"
+        :height="`${height}px`"
+        trigger="click"
+        :autoplay="false"
+        :loop="false"
+      >
+        <el-carousel-item v-for="(nft, i) in nfts" :key="i">
           <div class="card" ref="card">
             <imgs class="banner" :src="card.banner" />
             <div class="content">
-              <div class="name">{{ card.nft.name }}</div>
-              <div class="description">{{ card.nft.description }}</div>
+              <div class="name">{{ nft.name }}</div>
+              <div class="description">{{ nft.description }}</div>
               <div class="date">活动时间：{{ formatDate(card) }}</div>
               <div class="address">活动地点：{{ card.describe }}</div>
             </div>
             <div class="check" :class="status">
               <div class="cricle left"></div>
               <div class="cricle right"></div>
+              <div class="token-id">No.{{ i }} #{{ nft.tokenId }}</div>
               <template v-if="status === 'success'">
                 <div class="status">恭喜您，验票成功！</div>
                 <div class="tip">
@@ -49,6 +56,7 @@
   </div>
 </template>
 <script>
+import { getTargetNFTs } from '~/assets/js/ticket/auth'
 import QRCode from 'qrcode'
 import dayjs from 'dayjs'
 import back from '~/components/back.vue'
@@ -57,9 +65,8 @@ export default {
   data() {
     return {
       loading: false,
-      card: {
-        nft: {},
-      },
+      card: {},
+      nfts: [],
       provider: {},
       status: '',
       QRCode: '',
@@ -97,7 +104,7 @@ export default {
     async init() {
       this.loading = true
       const address = this.provider._address.addressString
-      const nfts = await Sea.Ajax({
+      let nfts = await Sea.Ajax({
         url: '/ckb',
         method: 'get',
         data: {
@@ -106,11 +113,32 @@ export default {
           limit: 1000,
         },
       })
-      console.log(
-        '🌊',
-        nfts[0].map((e) => e.tokenId),
+      const activity = this.card.id
+      nfts = getTargetNFTs(nfts, this.card.nftTypeArgs)
+      const tokens = nfts.map((e) => e.tokenId)
+      const status = await Sea.GetNftQrStateFromTokenIds(
+        activity,
+        address,
+        tokens,
       )
-      console.log('🌊', this.card)
+      this.loading = false
+      // Init 0 初始化
+      // NotIssued 1 没有生成二维码
+      // Issued 2 生成二维码未验票
+      // Verified 3 已验票
+      // VerifiedSuccess 4 已验票
+      // VerifiedFail 5 已验票
+      for (const nft of nfts) {
+        for (const state of status) {
+          if (String(nft.tokenId) === String(state.tokenId)) {
+            nft.state = state
+          }
+        }
+      }
+      this.nfts = nfts
+      this.$nextTick(() => {
+        this.initHeight()
+      })
     },
     initHeight() {
       const dom = this.$refs.card[0]

@@ -5,6 +5,7 @@ import { getAddressByPubkey, getDataFromSignString } from '../utils/utils'
 interface NFT {
   classTypeArgs: string
   nftTypeArgs: string
+  tokenId: number
   outPoint: {
     txHash: string
     index: string
@@ -77,4 +78,15 @@ export function authAdrress(signStr: string, address: string): boolean {
   const pubkeyAddress = new Address(pubkeyAddressStr, AddressType.ckb)
   if (pubkeyAddress.lockArgs !== pushAddress.lockArgs) return false
   return true
+}
+
+export function getTargetNFTs(list: NFT[][], targetArgs: string) {
+  let cards: NFT[] = []
+  for (const items of list) {
+    const classId = items[0].classTypeArgs
+    if (classId === targetArgs) {
+      cards = items as NFT[]
+    }
+  }
+  return cards
 }
