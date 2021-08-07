@@ -306,3 +306,24 @@ Sea.getAssetsAndAuthNFT = async (
 
   return data
 }
+
+// get addressNfts to get qr state
+//
+
+Sea.GetNftQrStateFromTokenIds = async (activity, address, token) => {
+  const data = {
+    address,
+    activity,
+    token,
+  }
+  try {
+    const res = await Sea.Ajax({
+      url: '/ticket/state',
+      method: 'post',
+      data,
+    })
+    return res
+  } catch (e) {
+    return []
+  }
+}

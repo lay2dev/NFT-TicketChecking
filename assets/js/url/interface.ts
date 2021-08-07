@@ -52,3 +52,12 @@ export interface UnipassData {
   pubkey: string
   sig?: string
 }
+
+export enum RQStatus {
+  Init = 0,
+  NotIssued,
+  Issued,
+  Verified,
+  VerifiedSuccess,
+  VerifiedFail,
+}
