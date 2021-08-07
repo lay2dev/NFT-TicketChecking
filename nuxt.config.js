@@ -1,3 +1,5 @@
+// import path from 'path'
+// import fs from 'fs'
 export default {
   ssr: false,
   // Target: https://go.nuxtjs.dev/config-target
@@ -90,7 +92,11 @@ export default {
 
   // server
   server: {
-    host: '0.0.0.0',
+    // host: '0.0.0.0',
     port: 5002,
+    // https: {
+    //   key: fs.readFileSync(path.resolve(__dirname, 'bin/cert.key')),
+    //   cert: fs.readFileSync(path.resolve(__dirname, 'bin/cert.crt')),
+    // },
   },
 }

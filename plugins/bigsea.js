@@ -1,4 +1,4 @@
-import '~/assets/js/utils/bigsea'
+import 'bigsea'
 import dayjs from 'dayjs'
 import PWCore, { ChainID } from '@lay2/pw-core'
 import { ActionType } from 'assets/js/url/interface'
