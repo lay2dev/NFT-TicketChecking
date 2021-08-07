@@ -221,7 +221,13 @@ Sea.getTicketSignData = async (
   })
   const data = await authHaveTargetNFT(res, targetArgs, targetTokenID)
   if (!data.pass) return false
-  await Sea.getSignMessage(activity, data.ticketId)
+  await Sea.getSignMessage(
+    activity,
+    data.ticketId,
+    address,
+    targetArgs,
+    data.args,
+  )
   return true
 }
 
@@ -242,10 +248,19 @@ Sea.getTxSignData = (info) => {
   return { info }
 }
 
-Sea.getSignMessage = async (activity, tokenId) => {
+Sea.getSignMessage = async (
+  activity,
+  tokenId,
+  address,
+  classArgs,
+  typeArgs,
+) => {
   const data = {
     activity,
     tokenId,
+    address,
+    classArgs,
+    typeArgs,
   }
   console.log(data)
   const res = await Sea.Ajax({

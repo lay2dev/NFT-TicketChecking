@@ -43,6 +43,7 @@ export function authHaveTargetNFT(
   let pass = false
   const list2 = []
   const nfts = []
+  let args = ''
   for (const items of list) {
     list2.push(...items)
   }
@@ -63,9 +64,10 @@ export function authHaveTargetNFT(
     pass = true
     ticketId = tokenId
     nfts.push(item)
+    args = item.nftTypeArgs
     break
   }
-  return { pass, ticketId, nfts }
+  return { pass, ticketId, nfts, args }
 }
 
 export function authAdrress(signStr: string, address: string): boolean {
