@@ -11,12 +11,12 @@
         @click="bindCard(card)"
       >
         <div class="status">{{ statusDict[card.status] }}</div>
-        <div class="mask"></div>
-        <img :src="card.banner" alt="card" />
+        <imgs :src="card.banner" alt="card" />
         <div class="content">
           <div class="date">活动时间：{{ formatDate(card) }}</div>
           <div class="address">活动地点：{{ card.describe }}</div>
         </div>
+        <div class="mask"></div>
       </div>
     </div>
   </div>
@@ -114,11 +114,10 @@ export default {
         background: rgba(255, 255, 255, 0.6);
       }
 
-      img {
+      .imgs {
         border-radius: 16px 16px 0 0;
         width: 100%;
         height: 51.2vw;
-        object-fit: cover;
       }
 
       .content {

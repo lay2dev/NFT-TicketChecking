@@ -4,7 +4,7 @@
     <div class="page-title">{{ card.title }}</div>
     <div class="card-box">
       <div class="card">
-        <el-image class="banner" :src="card.banner" alt="card" />
+        <imgs class="banner" :src="card.banner" />
         <div class="content">
           <div class="name">{{ card.nft.name }}</div>
           <div class="description">{{ card.nft.description }}</div>
@@ -16,18 +16,28 @@
           <div class="cricle right"></div>
           <template v-if="status === 'success'">
             <div class="status">恭喜您，验票成功！</div>
-            <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div>
+            <div class="tip">
+              验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
+            </div>
             <div class="show">请对工作人员出示此页面</div>
           </template>
           <template v-if="status === 'qrcode'">
             <img :src="QRCode" alt="QRCode" />
-            <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div>
+            <div class="tip">
+              验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
+            </div>
             <div class="show">请向工作人员出示此二维码</div>
           </template>
           <template v-else>
             <div class="status">待验票</div>
-            <div class="tip">{{tips}}</div>
-            <el-button round type="primary" :loading="loading" @click="bindCheck">{{label}}</el-button>
+            <div class="tip">{{ tips }}</div>
+            <el-button
+              round
+              type="primary"
+              :loading="loading"
+              @click="bindCheck"
+              >{{ label }}</el-button
+            >
           </template>
         </div>
       </div>
@@ -38,8 +48,9 @@
 import QRCode from 'qrcode'
 import dayjs from 'dayjs'
 import back from '~/components/back.vue'
+import Image from '~/components/imgs.vue'
 export default {
-  components: { back },
+  components: { back, Image },
   data() {
     return {
       loading: false,

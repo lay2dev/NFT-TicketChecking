@@ -1,12 +1,13 @@
 {
-  "name": "sea.web",
+  "name": "unipass-ticket-checking",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "nuxt",
     "build": "nuxt generate",
     "preview": "node preview.js",
-    "publish": "node bin/publish-cdn.js",
+    "publish": "nuxt generate&&node bin/publish-cdn.js",
+    "publish-cdn": "node bin/publish-cdn.js",
     "lint": "eslint --fix --ext \".js,.vue\" --ignore-path .gitignore .",
     "yarn": "yarn"
   },
