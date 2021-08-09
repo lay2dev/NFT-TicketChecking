@@ -8,16 +8,22 @@
           <template v-if="status === 'success'">
             <img class="icon" src="~/assets/img/success.svg" />
             <div class="status">#{{ ticketId }}，验票成功!</div>
-            <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div>
+            <div class="tip">
+              验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
+            </div>
           </template>
           <template v-else-if="status === 'fail'">
             <img class="icon" src="~/assets/img/fail.svg" />
             <div class="status">验票失败!</div>
-            <div class="tip">验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}</div>
+            <div class="tip">
+              验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
+            </div>
           </template>
           <template v-else>
-            <div class="status">{{tips}}</div>
-            <el-button round type="primary" :loading="loading" @click="login">{{label}}</el-button>
+            <div class="status">{{ tips }}</div>
+            <el-button round type="primary" :loading="loading" @click="login">{{
+              label
+            }}</el-button>
           </template>
         </div>
       </div>

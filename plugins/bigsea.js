@@ -134,6 +134,10 @@ Sea.getShortKeyInfoData = async ({ key, token }) => {
       token,
     },
   })
+  // 200 有权限
+  // 400 没权限
+  // 403 没权限
+  // 410 已验票
   if (res.code !== 200) return [false, false]
   if (res.code === 200) return [true, res]
   if (res.code !== 403) return [false, true]
@@ -228,7 +232,6 @@ Sea.getTicketSignData = async (
     targetArgs,
     data.args,
   )
-  return true
 }
 
 Sea.getTxSignData = (info) => {
