@@ -45,7 +45,7 @@ export default {
       if (card.showStatus === 2) {
         this.$message.info('活动已结束')
       } else {
-        Sea.saveData('card', card)
+        Sea.localStorage('card', card)
         this.$router.push('/ticket')
       }
     },

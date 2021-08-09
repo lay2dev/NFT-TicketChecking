@@ -65,7 +65,7 @@ export default {
     const { key, id } = this.$route.query
     this.key = key
     this.id = id
-    const provider = Sea.getData('provider')
+    const provider = Sea.localStorage('provider')
     console.log(provider)
     if (provider) {
       this.provider = provider
@@ -125,7 +125,7 @@ export default {
     },
     async getToken() {
       this.loading = true
-      const provider = Sea.getData('provider')
+      const provider = Sea.localStorage('provider')
       const address = provider._address.addressString
       const token = await Sea.getToken(address, this.id)
       console.log(token)

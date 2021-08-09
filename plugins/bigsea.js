@@ -191,22 +191,6 @@ Sea.formatDate = (card) => {
   return `${start} - ${end}`
 }
 
-Sea.getClassArgs = () => {
-  const classArgs = Sea.localStorage('classArgs')
-  return classArgs
-}
-
-Sea.saveClassArgs = (classArgs) => {
-  Sea.localStorage('classArgs', classArgs)
-}
-
-Sea.saveData = (key, data) => {
-  Sea.localStorage(key, data)
-}
-Sea.getData = (key) => {
-  return Sea.localStorage(key)
-}
-
 Sea.getTicketSignData = async (
   address,
   targetArgs,

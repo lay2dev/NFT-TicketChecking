@@ -5,13 +5,20 @@
     <div class="card-box">
       <el-carousel
         class="cards"
+        ref="carousel"
         :height="`${height}px`"
         trigger="click"
         :autoplay="false"
         :loop="false"
+        indicator-position="none"
+        @change="bindChange"
       >
         <template v-if="nfts.length">
-          <el-carousel-item v-for="(nft, i) in nfts" :key="i">
+          <el-carousel-item
+            v-for="(nft, i) in nfts"
+            :key="i"
+            :name="String(nft.tokenId)"
+          >
             <div class="card" ref="card">
               <imgs class="banner" :src="card.banner" />
               <div class="content">
@@ -21,7 +28,7 @@
                 <div class="address">活动地点：{{ card.describe }}</div>
                 <div class="token">门票编号：#{{ nft.tokenId }}</div>
               </div>
-              <div class="check" :class="'state' + nft.rqState">
+              <div class="check">
                 <div class="cricle left"></div>
                 <div class="cricle right"></div>
                 <template v-if="nft.rqState === 1">
@@ -31,28 +38,39 @@
                     round
                     type="primary"
                     :loading="loading"
-                    @click="bindCheck"
+                    @click="bindCheck(nft)"
                   >
                     发起验票
                   </el-button>
                 </template>
-                <template v-if="nft.rqState === 2">
-                  <img :src="nft.QRCode" alt="QRCode" />
+                <template v-else-if="nft.rqState === 2">
+                  <img class="qrcode" :src="nft.QRCode" />
                   <div class="tip">
                     验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
                   </div>
                   <div class="show">请向工作人员出示此二维码</div>
                 </template>
-                <template v-if="nft.rqState >= 3">
-                  <div class="status">已验票</div>
-                  <div class="tip">不可使用</div>
+                <template v-else-if="nft.rqState === 5">
+                  <div class="status">已使用</div>
+                  <div class="tip">此 NFT 已使用，无法再次兑票。</div>
+                </template>
+                <template v-else-if="nft.rqState >= 3">
+                  <img class="qrcode" :src="nft.QRCode" />
+                  <div class="tip">
+                    验票时间：{{
+                      nft.rqVerifyTime
+                        ? dayjs(nft.rqVerifyTime).format('YYYY年M月D日 HH:mm')
+                        : '-'
+                    }}
+                  </div>
+                  <div class="show">该二维码已被使用</div>
                 </template>
               </div>
             </div>
           </el-carousel-item>
         </template>
         <template v-else>
-          <div class="card" ref="card">
+          <div class="card" ref="card" v-loading="true">
             <imgs class="banner" :src="card.banner" />
             <div class="content">
               <div class="name">{{ card.nft.name }}</div>
@@ -82,7 +100,9 @@ export default {
     return {
       initLoading: true,
       loading: false,
-      card: {},
+      card: {
+        nft: [],
+      },
       nfts: [],
       provider: {},
       status: '',
@@ -90,8 +110,8 @@ export default {
     }
   },
   async created() {
-    const card = Sea.getData('card')
-    const provider = Sea.getData('provider')
+    const card = Sea.localStorage('card')
+    const provider = Sea.localStorage('provider')
     if (card && provider) {
       this.card = card
       this.provider = provider
@@ -114,6 +134,14 @@ export default {
     })
   },
   methods: {
+    bindChange(i) {
+      const nft = this.nfts[i]
+      if (this.loading) {
+        //
+      } else {
+        Sea.params('token-id', nft.tokenId)
+      }
+    },
     async init() {
       this.loading = true
       const address = this.provider._address.addressString
@@ -138,23 +166,28 @@ export default {
       for (const nft of nfts) {
         for (const state of status) {
           if (String(nft.tokenId) === String(state.tokenId)) {
-            const { rqState, short } = state
+            const { rqState, short, rqVerifyTime } = state
             nft.rqState = rqState
             nft.short = short
+            nft.rqVerifyTime = rqVerifyTime
             // 0: '初始化',
             // 1: '生成二维码',
             // 2: '生成二维码未验票',
             // 3: '已验票',
             // 4: '已验票',
-            // 5: '已验票',
-            if (rqState === 2 && short) {
+            // 5: '此 NFT 已使用，无法再次兑票',
+            if (rqState >= 2 && short) {
               const url = `${window.location.origin}/check?key=${short}&id=${this.card.id}`
+              let dark = '#000000'
+              if (rqState !== 2) {
+                dark = '#00000073'
+              }
               nft.QRCode = await QRCode.toDataURL(url, {
                 type: 'image/png',
                 width: 240,
                 margin: 2,
                 color: {
-                  dark: '#000000',
+                  dark,
                   light: '#FFFFFF',
                 },
               })
@@ -165,10 +198,17 @@ export default {
       this.nfts = nfts
       this.$nextTick(() => {
         this.initHeight()
+        const id = this.$route.query['token-id']
+        if (id) {
+          this.$refs.carousel.setActiveItem(id)
+        }
       })
     },
     initHeight() {
       const card = this.$refs.card
+      if (!card) {
+        return
+      }
       let h = 0
       if (Array.isArray(card)) {
         for (const dom of card) {
@@ -179,7 +219,7 @@ export default {
       } else {
         h = card.clientHeight
       }
-      this.height = h + 60
+      this.height = h + 46
     },
     async getShortUrlKeyByInfo(data) {
       const req = {
@@ -189,21 +229,35 @@ export default {
         tokenId: data.tokenId,
         activity: data.activity,
       }
-      console.log(req)
       const res = await Sea.getShortUrlKeyInfo(req)
       if (!res[0]) return res[1]
       return res[1]
     },
     dayjs,
-    async bindCheck() {
-      this.loading = true
-      const address = this.provider._address.addressString
-      await Sea.getTicketSignData(
-        address,
-        this.card.nftTypeArgs,
-        this.card.tokenId,
-        this.card.id,
+    bindCheck(nft) {
+      this.$confirm(
+        '一张NFT门票仅能兑换一次二维码门票，兑换后请不要再转让此NFT，否则可能会导致验票失败。',
+        '提示',
+        {
+          confirmButtonText: '确认',
+          cancelButtonText: '取消',
+        },
       )
+        .then(async () => {
+          this.loading = true
+          const address = this.provider._address.addressString
+          await Sea.getTicketSignData(
+            address,
+            this.card.nftTypeArgs,
+            nft.tokenId,
+            this.card.id,
+          )
+          this.loading = false
+          // sign message
+        })
+        .catch(() => {
+          this.$message('取消验票')
+        })
     },
     async bindCheckNext(data) {
       const address = this.provider._address.addressString
@@ -322,6 +376,7 @@ export default {
           }
 
           .status {
+            text-align: center;
             margin-top: 28px;
             font-weight: bold;
             color: rgba(255, 164, 0, 100);
@@ -340,26 +395,8 @@ export default {
             margin-top: 24px;
             background-image: linear-gradient(to right, #69C0FF, #2A65C4);
           }
-        }
 
-        .check.success {
-          .status {
-            color: #3BC200;
-          }
-
-          .tip {
-            margin-top: 16px;
-          }
-
-          .show {
-            color: rgba(0, 0, 0, 0.85);
-            margin-top: 16px;
-          }
-        }
-
-        // qrcode
-        .check.state2 {
-          img {
+          .qrcode {
             margin-top: 16px;
             width: 120px;
             height: 120px;
