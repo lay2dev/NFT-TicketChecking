@@ -75,20 +75,6 @@ Sea.getToken = async (address, key) => {
   return res
 }
 
-Sea.pushVerifyData = async (pass, key, token) => {
-  const res = await Sea.Ajax({
-    url: '/ticket/vierfiy',
-    data: {
-      pass,
-      key,
-      token,
-    },
-    method: 'patch',
-  })
-  if (res.code !== 200) return false
-  return res
-}
-
 Sea.getActivity = async () => {
   console.log('getActivity')
   const res = await Sea.Ajax({
@@ -123,24 +109,6 @@ Sea.getShortUrlKeyInfo = async (data) => {
   if (res.code === 410) return [true, true]
   if (res.code !== 200) return [false, false]
   return [true, res]
-}
-
-Sea.getShortKeyInfoData = async ({ key, token }) => {
-  const res = await Sea.Ajax({
-    url: '/ticket/vierfiy',
-    method: 'get',
-    data: {
-      key,
-      token,
-    },
-  })
-  // 200 有权限
-  // 400 没权限
-  // 403 没权限
-  // 410 已验票
-  if (res.code !== 200) return [false, false]
-  if (res.code === 200) return [true, res]
-  if (res.code !== 403) return [false, true]
 }
 
 Sea.createSignMessage = (message, tokenId) => {

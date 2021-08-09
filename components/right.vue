@@ -1,7 +1,7 @@
 <template>
   <div id="component-back">
-    <div class="right" @click="bindBack">
-      <el-button round type="primary" :loading="loading" @click="clear">切换验证</el-button>
+    <div class="right">
+      <el-button round type="primary" @click="clear">切换账号</el-button>
     </div>
     <div class="right">
       <slot />
@@ -18,6 +18,7 @@ export default {
   },
   methods: {
     clear() {
+      window.localStorage.clear()
       this.$emit('clear')
     },
   },
@@ -54,6 +55,11 @@ export default {
     align-items: center;
     font-weight: bold;
     z-index: 100;
+
+    .el-button {
+      border: 0;
+      background-image: linear-gradient(to right, #69C0FF, #2A65C4);
+    }
 
     a {
       color: #000;

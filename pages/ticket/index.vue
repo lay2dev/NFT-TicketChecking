@@ -70,7 +70,7 @@
           </el-carousel-item>
         </template>
         <template v-else>
-          <div class="card" ref="card" v-loading="true">
+          <div class="card" ref="card" v-loading="loading">
             <imgs class="banner" :src="card.banner" />
             <div class="content">
               <div class="name">{{ card.nft.name }}</div>
@@ -82,6 +82,8 @@
             <div class="check">
               <div class="cricle left"></div>
               <div class="cricle right"></div>
+              <div class="status">暂无门票</div>
+              <div class="tip">您需要持有图中指定 NFT，才能通过验证。</div>
             </div>
           </div>
         </template>
@@ -98,8 +100,7 @@ export default {
   components: { back },
   data() {
     return {
-      initLoading: true,
-      loading: false,
+      loading: true,
       card: {
         nft: [],
       },
@@ -136,6 +137,7 @@ export default {
   methods: {
     bindChange(i) {
       const nft = this.nfts[i]
+      console.log('🌊', nft.QRCodeUrl)
       if (this.loading) {
         //
       } else {
@@ -182,6 +184,7 @@ export default {
               if (rqState !== 2) {
                 dark = '#00000073'
               }
+              nft.QRCodeUrl = url
               nft.QRCode = await QRCode.toDataURL(url, {
                 type: 'image/png',
                 width: 240,

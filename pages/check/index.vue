@@ -1,29 +1,35 @@
 <template>
   <div id="page-ticket">
-    <div class="page-title">NFT验票</div>
-    <!-- <right @clear="init" /> -->
+    <div class="page-title">NFT 验票</div>
+    <right @clear="init" />
     <div class="card-box">
       <div class="card">
         <div class="check" :class="status">
           <template v-if="status === 'success'">
             <img class="icon" src="~/assets/img/success.svg" />
-            <div class="status">#{{ ticketId }}，验票成功!</div>
+            <div class="status">#{{ ticketId }}，验票成功</div>
             <div class="tip">
               验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
             </div>
           </template>
           <template v-else-if="status === 'fail'">
             <img class="icon" src="~/assets/img/fail.svg" />
-            <div class="status">验票失败!</div>
+            <div class="status">验票失败</div>
             <div class="tip">
               验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
             </div>
           </template>
           <template v-else>
             <div class="status">{{ tips }}</div>
-            <el-button round type="primary" :loading="loading" @click="login">{{
-              label
-            }}</el-button>
+            <el-button
+              v-if="btnText"
+              round
+              type="primary"
+              :loading="loading"
+              @click="bindCheck"
+            >
+              {{ btnText }}
+            </el-button>
           </template>
         </div>
       </div>
@@ -53,8 +59,8 @@ export default {
       authData: null,
       result: null,
       ticketId: '',
-      tips: '待验票中',
-      label: '验票中。。',
+      tips: '',
+      btnText: '',
     }
   },
   async created() {
@@ -66,7 +72,6 @@ export default {
     this.key = key
     this.id = id
     const provider = Sea.localStorage('provider')
-    console.log(provider)
     if (provider) {
       this.provider = provider
       const token = Sea.localStorage('token')
@@ -75,10 +80,9 @@ export default {
       } else {
         this.token = token.token
         this.targetArgs = token.nftTypeArgs
-        this.bindCheck()
+        this.start()
       }
     } else {
-      console.log(provider)
       this.init()
     }
   },
@@ -86,41 +90,45 @@ export default {
     dayjs,
     // get data
     async getShortKeyInfoData() {
-      console.log('[getShortKeyInfoData]', this.key)
-
-      const authData = await Sea.getShortKeyInfoData({
-        key: this.key,
-        token: this.token,
+      const res = await Sea.Ajax({
+        url: '/ticket/vierfiy',
+        method: 'get',
+        data: {
+          key: this.key,
+          token: this.token,
+        },
       })
-      console.log(authData)
-      // auth datat
-      if (!authData[0]) {
+      if (res.code === 200) {
+        return res
+      } else {
         this.tips = '当前地址无验票权限'
-        this.label = '切换账号'
+        this.btnText = ''
         this.token = false
         this.loading = false
-      } else {
-        this.authData = authData[1]
       }
     },
 
     async init() {
-      console.log('this.token')
       this.loading = true
       const provider = await Sea.login()
-      console.log(provider)
       if (provider) {
         this.$store.state.provider = provider
         this.provider = provider
       }
       this.loading = false
     },
-
-    async login() {
-      if (this.token) return
+    async bindLogin() {
+      if (this.token) {
+        return
+      }
       this.loading = true
       Sea.localStorage('token', null)
       await Sea.login(true)
+      this.loading = false
+    },
+    start() {
+      this.tips = '待验票'
+      this.btnText = '开始验票'
       this.loading = false
     },
     async getToken() {
@@ -128,36 +136,31 @@ export default {
       const provider = Sea.localStorage('provider')
       const address = provider._address.addressString
       const token = await Sea.getToken(address, this.id)
-      console.log(token)
       if (!token) {
         this.tips = '当前地址无验票权限'
-        this.label = '切换账号'
+        this.btnText = ''
         this.token = false
         this.loading = false
         return
       }
       Sea.localStorage('token', token)
       this.token = token.token
-      console.log(token)
       this.targetArgs = token.nftTypeArgs
-      this.bindCheck()
+      this.start()
     },
-
     // start verifiy
-    async startVerifiyQRData() {
-      if (!this.targetArgs || !this.authData) {
+    async startVerifiyQRData(authData) {
+      if (!this.targetArgs || !authData) {
         this.loading = false
         return
       }
-      console.log('[startVerifiyQRData]', this.authData.address)
       const data = await Sea.getAssetsAndAuthNFT(
-        this.authData.address,
+        authData.address,
         this.targetArgs,
-        this.authData.targetTokenId,
-        this.authData.sig,
-        this.authData.messageHash,
+        authData.targetTokenId,
+        authData.sig,
+        authData.messageHash,
       )
-      console.log('[startVerifiyQRData]', data)
       this.loading = false
       return data
     },
@@ -165,12 +168,32 @@ export default {
     async bindCheck() {
       this.loading = true
       // todo get auth data from key
-      await this.getShortKeyInfoData()
-      const { pass, ticketId } = await this.startVerifiyQRData()
-      pass ? (this.status = 'success') : (this.status = 'fail')
-      this.loading = false
+      const authData = await this.getShortKeyInfoData()
+      const { pass, ticketId } = await this.startVerifiyQRData(authData)
       this.ticketId = ticketId
-      const data = await Sea.pushVerifyData(pass, this.key, this.token)
+      const res = await Sea.Ajax({
+        url: '/ticket/vierfiy',
+        data: {
+          pass,
+          key: this.key,
+          token: this.token,
+        },
+        method: 'patch',
+      })
+      const code = res.code
+      // 200 有权限
+      // 400 没权限
+      // 403 没权限
+      // 410 已验票
+      if (code === 200) {
+        this.status = pass ? 'success' : 'fail'
+      } else if (code === 410) {
+        this.tips = '该门票已被使用'
+        this.btnText = ''
+      } else {
+        this.tips = '无权限'
+      }
+      this.loading = false
     },
     formatDate: Sea.formatDate,
   },
@@ -336,23 +359,10 @@ export default {
         }
       }
 
-      .check.qrcode {
-        img {
-          margin-top: 16px;
-          width: 120px;
-          height: 120px;
-        }
-
-        .show {
-          margin-top: 12px;
-          margin-bottom: 16px;
-        }
-      }
-
       .icon {
         margin-top: 16px;
-        width: 40%;
-        height: 40%;
+        width: 100px;
+        height: 100px;
       }
 
       svg g polyline {
