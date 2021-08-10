@@ -7,7 +7,7 @@
         <div class="check" :class="status">
           <template v-if="status === 'success'">
             <img class="icon" src="~/assets/img/success.svg" />
-            <div class="status">#{{ ticketId }}，验票成功</div>
+            <div class="status">验票成功</div>
             <div class="tip">
               验票时间：{{ dayjs().format('YYYY年M月D日 HH:mm') }}
             </div>

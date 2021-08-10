@@ -46,7 +46,7 @@ export default {
         this.$message.info('活动已结束')
       } else {
         Sea.localStorage('card', card)
-        this.$router.push('/ticket')
+        this.$router.push('/ticket/')
       }
     },
     formatDate: Sea.formatDate,

@@ -179,7 +179,7 @@ export default {
             // 4: '已验票',
             // 5: '此 NFT 已使用，无法再次兑票',
             if (rqState >= 2 && short) {
-              const url = `${window.location.origin}/check?key=${short}&id=${this.card.id}`
+              const url = `${window.location.origin}/check/?key=${short}&id=${this.card.id}`
               let dark = '#000000'
               if (rqState !== 2) {
                 dark = '#00000073'
